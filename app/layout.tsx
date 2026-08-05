@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 import { siteConfig } from "@/content/site";
 

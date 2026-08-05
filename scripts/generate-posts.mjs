@@ -1,7 +1,8 @@
-﻿import { access, copyFile, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { access, copyFile, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { marked } from "marked";
+import markedKatex from "marked-katex-extension";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const articlesDirectory = path.join(projectRoot, "content", "articles");
@@ -9,6 +10,7 @@ const outputFile = path.join(projectRoot, "content", "generated-posts.ts");
 const generatedAssetsDirectory = path.join(projectRoot, "public", "article-assets");
 
 marked.use({ gfm: true, breaks: false });
+marked.use(markedKatex({ throwOnError: false, nonStandard: true }));
 
 function unquote(value) {
   const trimmed = String(value ?? "").trim();
