@@ -665,6 +665,22 @@ export const posts: Post[] = [
       }
     ],
     "html": "<blockquote>\n<p>[!Tip] 引言\n在工作和学习中，PDF 文件是我们常常会接触到的一种文档格式。尽管它稳定、通用，但有时我们会遇到一些烦人的水印，影响阅读体验，或者需要处理的 PDF 文件太大，不方便分享。那么有没有简单的方法，能够很方便的去除PDF文件中的水印呢？答案是：有！今天，我们将带你了解如何使用 Python 和 PyMuPDF 库来解决这些问题。</p>\n</blockquote>\n<h3 id=\"实现思路\">实现思路</h3>\n<p>我们的主要目标有两个：</p>\n<ol>\n<li><strong>去除水印</strong>：遍历 PDF 的每个页面，将水印像素转变为白色。</li>\n<li><strong>压缩 PDF 文件</strong>：保持图像的分辨率不变，通过调整 JPEG 压缩率生成更小的 PDF 文件。</li>\n</ol>\n<p>具体实现分为以下几步：</p>\n<ol>\n<li>打开 PDF 文件，提取每一页作为图像。</li>\n<li>遍历图像的每个像素，将PDF水印中的RGB改为 (255, 255, 255) 即白色。</li>\n<li>保存去除水印后的图像，并使用 JPEG 压缩。</li>\n<li>将处理后的图像重新组合成 PDF 文件，并启用 PDF 内置压缩。</li>\n</ol>\n<p>本例中我们下载到一篇带水印的文献，如下所示：\n<img src=\"/article-assets/tools-1/Pasted%20image%2020240907182413%201.png\" alt=\"Pasted image 20240907182413 1.png\">\n先查看一下文档中水印的RGB值，可以使用微信的截图工具很方便的查看，</p>\n<h3 id=\"核心代码解析\">核心代码解析</h3>\n<p>以下是核心代码，展示如何去除 PDF 水印并生成体积较小的 PDF 文件：</p>\n<pre><code class=\"language-python\">import fitz  # PyMuPDF  \nfrom itertools import product  \nimport os  \n  \ndef remove_watermark_from_page(page, zoom=12.0):  \n    mat = fitz.Matrix(zoom, zoom)  \n    pix = page.get_pixmap(matrix=mat, alpha=False)  # alpha=False 以减少内存占用  \n    for pos in product(range(pix.width), range(pix.height)):  \n        if sum(pix.pixel(pos[0], pos[1])) &gt;= 660:  # 调整阈值  \n            pix.set_pixel(pos[0], pos[1], (255, 255, 255))  # 设置为白色  \n    return pix  \n  \ndef remove_pdf_watermark(input_pdf, output_dir, zoom=12.0):  \n    try:  \n        os.makedirs(output_dir, exist_ok=True)  \n        pdf_file = fitz.open(input_pdf)  \n  \n        for page_no in range(len(pdf_file)):  \n            page = pdf_file[page_no]  \n            pix = remove_watermark_from_page(page, zoom=zoom)  \n            output_image_path = os.path.join(output_dir, f&quot;{page_no}.jpg&quot;)  \n            # 使用高压缩率保存 JPEG 图像  \n            pix.save(output_image_path, &quot;jpeg&quot;, quality=75)  # quality 参数控制 JPEG 压缩率  \n            print(f&#39;第 {page_no} 页处理并保存为 {output_image_path}&#39;)  \n  \n        pdf_file.close()  \n    except Exception as e:  \n        print(f&quot;去水印过程中出错: {e}&quot;)  \n  \ndef images_to_pdf(images_dir, output_pdf):  \n    try:  \n        pdf = fitz.open()  \n        img_files = sorted(os.listdir(images_dir), key=lambda x: int(x.split(&#39;.&#39;)[0]))  \n  \n        for img in img_files:  \n            img_path = os.path.join(images_dir, img)  \n            img_pix = fitz.Pixmap(img_path)  \n  \n            # 创建与图像大小匹配的新页面  \n            pdf_page = pdf.new_page(width=img_pix.width, height=img_pix.height)  \n  \n            # 将图像插入到 PDF 页面中  \n            pdf_page.insert_image(pdf_page.rect, pixmap=img_pix, keep_proportion=True)  \n            print(f&quot;{img} 已添加到 PDF。&quot;)  \n  \n        pdf.save(output_pdf, deflate=True)  # 使用 deflate 压缩  \n        pdf.close()  \n        print(f&quot;PDF 已成功创建: {output_pdf}&quot;)  \n    except Exception as e:  \n        print(f&quot;创建 PDF 时出错: {e}&quot;)  \n  \nif __name__ == &#39;__main__&#39;:  \n    input_pdf = &quot;test.pdf&quot;  \n    output_dir = &quot;./watermark_removed_images&quot;  \n    output_pdf = &quot;result_no_watermark.pdf&quot;  \n  \n    remove_pdf_watermark(input_pdf, output_dir, zoom=12.0)  \n    images_to_pdf(output_dir, output_pdf)\n</code></pre>\n<p>运行后，<code>watermark_removed_images</code>文件夹中是去除水印后的图像，<code>result_no_watermark.pdf</code>为去除水印后的PDF文件。下图为去掉水印的效果，可以看到水印已经去除的非常干净，也保持了高清晰度。</p>\n<p><img src=\"/article-assets/tools-1/Pasted%20image%2020240907182015%201.png\" alt=\"Pasted image 20240907182015 1.png\"></p>\n<h3 id=\"功能亮点\">功能亮点</h3>\n<ol>\n<li><strong>保持高分辨率</strong>：在处理时保持 PDF 的图像的高分辨率，代码中通过<code>zoom=12.0</code>设置图像的dpi=1200，确保文档质量不会因为水印去除而受损。实际使用时可以根据需要调整该值。</li>\n<li><strong>灵活压缩</strong>：利用 JPEG 压缩算法，通过调整压缩率来实现文件体积的控制，通常 <code>quality=75</code> 是一个较为理想的数值，既保持了图像质量，又有效减小了文件体积。</li>\n<li><strong>内置压缩</strong>：利用 PyMuPDF 的 <code>deflate</code> 压缩功能，进一步优化生成的 PDF 文件大小。</li>\n</ol>\n<h3 id=\"总结\">总结</h3>\n<p>通过使用 Python 和 PyMuPDF，我们可以轻松去除 PDF 文件中的水印，并生成体积较小的高质量 PDF 文件。这种方法适合处理需要去水印且对文件大小敏感的场景，比如上传限制或文件传输要求。希望本教程能够帮助到你在日常工作中更好地处理 PDF 文档！</p>\n<p>如果你觉得这篇文章有帮助，欢迎点赞并分享给更多有需要的小伙伴~</p>\n"
+  },
+  {
+    "slug": "fiji-9",
+    "title": "Image J进行荧光共定位的定量分析--强度分布曲线",
+    "description": "只算 Pearson 系数还不够！用 Fiji 强度分布曲线直观展示两种荧光信号的共定位重合情况，为共定位结果增加可视化证据。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2024-03-15",
+    "dateLabel": "2024.03.15",
+    "readingTime": "2 分钟阅读",
+    "toc": [],
+    "html": "<p><strong>荧光共定位</strong>是一种技术，通过不同波长的荧光染料标记细胞内的不同成分，然后观察这些成分在空间上是否重叠或相邻。这项技术对于研究蛋白质间的相互作用及其在细胞内的分布非常有价值。  </p>\n<p><strong>Line Intensity Profile，也称为强度分布曲线，</strong> 是通过沿着图像上特定直线路径（用户自定义）收集的强度信息。换句话说，就是<strong>在图像的一个切线上测量并绘制该线上各点的亮度值</strong>。这通常用于对比荧光标记物的局部强度，以确定它们在空间上是否有共定位趋势。\n<img src=\"/article-assets/fiji-9/Pasted%20image%2020251119171058.png\" alt=\"Pasted image 20251119171058.png\"><br>例如，假设你有一个细胞样本，用两种不同颜色的荧光染料分别标记了两种蛋白质。你可以选择一条穿过感兴趣区域的线，然后用<strong>Line Intensity Profile</strong>来描绘沿这条直线的荧光强度。如果这两种不同色彩的强度分布曲线在图表上显现出<strong>高度重叠</strong>，那么可以推断这两种蛋白在那个局部区域有<strong>较高的共定位程度</strong>。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG133jXH24NQbp4CxxUHsiaD68j1clgXia3VialvVd54RvBpJZ82ZhT4KjQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=1\" alt=\"图片\">\n本期内容小编就为大家分享<strong>如何在Fiji (ImageJ)中快速绘制出文献中常见的荧光共定位图像中的Line Intensity Profile</strong>。</p>\n<p>将需要分析的图像导入至ImageJ中，本例中为两张荧光图像，分别为红色和绿色通道荧光图像；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG4UeiaC3HqiasRUSNGibQz83rIs3E6nbNPn8kNUenhoavBl8dnnec1aEkw/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=2\" alt=\"图片\">\n使用直线工具在图像需要分析的部分画一条ROI直线；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGHXZ4gFRCAq0ic2Iic7hWLib7CMdFwFw2H7uqWHqrCPrFavcOC8shB4Kmg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=3\" alt=\"图片\">\n点击“<font color=\"#de7802\">Analyze -&gt; Plot Profile</font>”即可绘制强度分布曲线；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGtaeTWHKHdLdCq2HhicxgianTtRsvw1TfU3LVibDGfyueibSvWjiczrKlsmg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=4\" alt=\"图片\">\n这里对应的是绿色荧光图像，因此我们将曲线的颜色更改为绿色。在图像下方的工具栏点击“<font color=\"#de7802\">More -&gt; Contents Style</font>”，在打开的窗口中更改“<font color=\"#de7802\">Color</font>”为“<font color=\"#de7802\">green</font>”；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGB468rfytRDWklQzHqbhlwANgMUqzKzIEKr9VnZKPz9lHTkgtEzUAfA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=5\" alt=\"图片\">\n接下来，对红色荧光图像也进行分析，可以使用&quot;<font color=\"#de7802\">ROI Manager</font>&quot;控制在两张图像同样的位置绘制直线。  </p>\n<p>绘制完成后，在图像下方的工具栏点击“<font color=\"#de7802\">Data -&gt; Add from Plot</font>”将红色荧光的曲线添加至第一张图像中并修改颜色为红色；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGFKCZHQ1OEtnCaTItaQgoW2LWtjVzIYIf4cibb94uFJ2ZbAheo5t8ibrQ/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=6\" alt=\"图片\">\n根据绘图需要可以对图像进行细节上的修改，点击“<font color=\"#de7802\">More -&gt; High-Resolution Plot</font>”生成清晰的图像，之后进行保存即可。<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGk7Zn21HTmlMsbuiaGhvR9LWY5Usu0mebTtWhTNuFZ6iaoT9hyVM5SbFA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=7\" alt=\"图片\">\n<img src=\"https://mmbiz.qpic.cn/mmbiz_jpg/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG8febYtDwBDia8eMEKVq9AWLkj7jSiczezG9ulnrj93YYHCgoUEGC9kMg/640?wx_fmt=jpeg&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=8\" alt=\"图片\"></p>\n"
   }
 ];
 
@@ -673,15 +689,15 @@ export const categories = ["全部","科研绘图与分析","细胞生物学","�
 export const tags: TagSummary[] = [
   {
     "name": "科研绘图",
-    "count": 9
+    "count": 10
   },
   {
     "name": "数据分析",
-    "count": 9
+    "count": 10
   },
   {
     "name": "Fiji",
-    "count": 8
+    "count": 9
   },
   {
     "name": "生信分析",
