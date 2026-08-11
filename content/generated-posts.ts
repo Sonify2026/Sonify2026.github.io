@@ -3,6 +3,43 @@ import type { Post, TagSummary } from "./post-types";
 
 export const posts: Post[] = [
   {
+    "slug": "fiji-8",
+    "title": "Fiji图像分析教程：从荧光通道分离到面积定量一步搞定",
+    "description": "多通道荧光图想要单独统计目标蛋白阳性面积？Fiji 一键拆分通道 + 自动定量，告别手动圈图，减少人为误差。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2026-07-12",
+    "dateLabel": "2026.07.12",
+    "readingTime": "8 分钟阅读",
+    "toc": [
+      {
+        "id": "分离合并的多通道图像",
+        "text": "分离合并的多通道图像",
+        "level": 3
+      },
+      {
+        "id": "图像阈值设置",
+        "text": "图像阈值设置",
+        "level": 3
+      },
+      {
+        "id": "自动阈值算法",
+        "text": "自动阈值算法",
+        "level": 3
+      },
+      {
+        "id": "测量阈值区域的面积",
+        "text": "测量阈值区域的面积",
+        "level": 3
+      }
+    ],
+    "html": "<p>在荧光显微成像实验中，我们经常需要对染色信号进行<strong>定量分析</strong>，例如测量血管面积、细胞阳性区域比例，或统计荧光信号强度。然而，对于很多刚接触图像分析的研究者来说，如何从原始图像中提取可靠的定量数据，往往是一个令人困惑的问题。</p>\n<p><strong>Fiji（ImageJ）</strong> 是生命科学领域应用最广泛的开源图像分析软件之一。通过简单的几个步骤，它就可以帮助我们完成从<strong>多通道图像分离、阈值分割，到荧光面积与强度测量</strong>的一整套分析流程。在这篇教程中，我们将以一个典型的荧光血管图像为例，详细介绍如何在 Fiji 中分离合并的荧光通道、选择合适的阈值分割方法、比较不同自动阈值算法的效果以及定量测量荧光区域的面积和信号强度，掌握这些基础操作后，你就可以快速完成大多数<strong>荧光染色定量分析任务</strong>。</p>\n<h3 id=\"分离合并的多通道图像\">分离合并的多通道图像</h3>\n<p>在对单个荧光染色（即单个通道）进行定量分析之前，通常需要先将多通道图像中的各个颜色通道拆分为独立图像。需要注意的是，该操作<strong>仅适用于由三张荧光图像合并形成的RGB图像</strong>。对于以下情况则无法直接使用此方法：</p>\n<ul>\n<li><strong>普通彩色染色图像</strong>（例如 H&amp;E、DAB 等明场染色图像）</li>\n<li><strong>包含超过 3 个荧光通道的合并图像</strong></li>\n</ul>\n<p>如果图像包含 <strong>3 个以上的荧光通道</strong>，则必须将其保存为 <strong>Hyperstack（超堆栈）或 Multi-plane TIFF（多层TIFF）</strong> 格式，才能在 Fiji 中正确分离通道。从技术角度来说，这是因为 Fiji 的 <strong>Split Channels</strong> 功能主要针对 <strong>RGB 三通道图像结构</strong>设计，而多通道显微图像通常需要通过 <strong>Hyperstack 结构</strong>来存储和管理。</p>\n<h4>操作步骤</h4>\n<h5>1. 打开示例图像</h5>\n<p>在 Fiji 中打开图像文件，本例中打开的图像如下：</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-1.png\" alt=\"荧光染色的面积与强度测量-20260312-1.png\"></p>\n<h5>2. 分离图像通道</h5>\n<p>在菜单栏中选择：<code>Image → Color → Split Channels</code>，该命令会自动将合并的RGB图像拆分为独立的通道图像。</p>\n<h5>3. 查看分离后的图像</h5>\n<p>执行操作后，原始图像将被拆分为 <strong>3 个独立图像窗口</strong>，每个窗口对应一个荧光通道。</p>\n<p>需要注意的是：</p>\n<ul>\n<li>每个通道图像实际上是 <strong>8-bit 灰度图像</strong></li>\n<li>图像亮度值代表该通道的 <strong>荧光信号强度</strong></li>\n<li>虽然显示为灰度图，但它们仍然可以用于后续的 <strong>定量测量（例如面积、平均强度、积分密度等）</strong></li>\n</ul>\n<p>在荧光定量分析中，这种处理方式是标准流程，因为 <strong>图像分析软件通常基于灰度像素值进行信号强度计算</strong>。</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-2.png\" alt=\"荧光染色的面积与强度测量-20260312-2.png\"></p>\n<h3 id=\"图像阈值设置\">图像阈值设置</h3>\n<p>在对图像进行定量分析之前，通常需要先进行<strong>阈值分割（Thresholding）</strong>。阈值操作的作用是根据像素灰度值，将图像中<strong>目标信号（如荧光染色区域）</strong> 与<strong>背景区域</strong>区分开，从而使软件能够识别并测量目标区域的面积或信号强度。</p>\n<h4>操作步骤</h4>\n<h5>1. 打开阈值设置工具</h5>\n<p>选择刚才分离出的 <strong>红色通道图像</strong>（本例中代表 <strong>血管染色信号</strong>）。然后在菜单栏中选择：<code>Image → Adjust → Threshold</code>，该命令会打开 <strong>Threshold（阈值）调整窗口</strong>。</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-3.png\" alt=\"荧光染色的面积与强度测量-20260312-3.png\"></p>\n<h5>2. 设置阈值参数</h5>\n<p>在阈值窗口中：</p>\n<ul>\n<li>勾选 <strong>Dark Background（暗背景）</strong></li>\n<li>其余参数保持默认设置</li>\n</ul>\n<p>此时，图像中满足阈值条件的区域会被覆盖上一层 <strong>红色掩膜</strong>。红色区域表示当前阈值范围内被识别为<strong>目标信号</strong>的像素。</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-4.png\" alt=\"荧光染色的面积与强度测量-20260312-4.png\"></p>\n<p>阈值窗口中有两个滑动条，用于控制灰度值范围：</p>\n<ul>\n<li><strong>上方滑块</strong>：设置阈值的 <strong>下限（Lower Threshold）</strong></li>\n<li><strong>下方滑块</strong>：设置阈值的 <strong>上限（Upper Threshold）</strong></li>\n</ul>\n<p>通过移动滑块，可以动态改变被选中的像素范围，从而优化目标结构（如血管）的识别效果。</p>\n<p>在窗口右侧的 <strong>灰度直方图（Histogram）</strong> 中：</p>\n<ul>\n<li>红色高亮区域表示当前被阈值选中的灰度范围</li>\n<li>直方图反映了图像中不同灰度值像素的分布情况</li>\n</ul>\n<p>通过观察直方图，可以更直观地判断阈值设置是否合理。</p>\n<p>如果点击 <strong>Auto</strong> 按钮，Fiji 会根据图像的灰度分布自动计算一个合适的阈值范围。在自动阈值模式下：</p>\n<ul>\n<li>左侧下拉菜单（默认显示 <strong>Default</strong>）提供了 <strong>16 种不同的自动阈值算法</strong></li>\n<li>每种算法适用于不同类型的图像和信号分布</li>\n</ul>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-5.png\" alt=\"荧光染色的面积与强度测量-20260312-5.png\"></p>\n<h3 id=\"自动阈值算法\">自动阈值算法</h3>\n<p>Fiji 提供了多种<strong>自动阈值（Auto Threshold）算法</strong>，用于根据图像的灰度分布自动计算最佳阈值。由于不同样本的信号特征、背景噪声和亮度分布可能存在较大差异，因此没有一种算法适用于所有图像。</p>\n<p>为了帮助用户快速比较不同算法的效果，Fiji 内置了一个 <strong>“Try All（全部测试）”</strong> 功能，可以一次性展示所有自动阈值算法的分割结果，从而方便选择最适合当前样本的算法。</p>\n<h4>操作步骤</h4>\n<h5>1. 打开自动阈值工具</h5>\n<p>在菜单栏中选择：<code>Image → Adjust → Auto Threshold</code>，系统会弹出 <strong>Auto Threshold 设置窗口</strong>。</p>\n<h5>2. 设置算法测试参数</h5>\n<p>在弹出的对话框中进行以下设置：</p>\n<ul>\n<li><strong>Method（方法）</strong>：选择 <strong>Try All</strong></li>\n<li>勾选 <strong>White objects on black background</strong>（白色目标 / 黑色背景）</li>\n<li>勾选 <strong>Show threshold values in log window</strong>（在日志窗口显示阈值数值）</li>\n</ul>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-6.png\" alt=\"荧光染色的面积与强度测量-20260312-6.png\"></p>\n<p>设置完成后点击 <strong>OK</strong>。</p>\n<p>这些选项的作用是：</p>\n<ul>\n<li><strong>Try All</strong>：依次运行所有自动阈值算法并生成对比结果</li>\n<li><strong>White objects on black background</strong>：将目标区域显示为白色、背景为黑色，这种显示方式更适合后续测量与形态学分析</li>\n<li><strong>Show threshold values in log window</strong>：在 Log 窗口中记录每种算法计算得到的阈值数值，便于后续复现或批量分析</li>\n</ul>\n<h5>3. 查看算法比较结果</h5>\n<p>执行后，Fiji 会生成一张 <strong>拼图式结果图</strong>。</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-7.png\" alt=\"荧光染色的面积与强度测量-20260312-7.png\"></p>\n<p>在该图中：</p>\n<ul>\n<li>每一个小图对应 <strong>一种自动阈值算法的分割结果</strong></li>\n<li>不同算法对同一图像的分割效果会有所不同</li>\n<li>具体使用的算法名称和对应阈值会记录在 <strong>Log 窗口</strong>中</li>\n</ul>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-8.png\" alt=\"荧光染色的面积与强度测量-20260312-8.png\"></p>\n<p>通过比较这些结果，可以快速判断哪种算法能够最准确地识别目标结构以及哪种算法会过度分割或遗漏信号。</p>\n<h3 id=\"测量阈值区域的面积\">测量阈值区域的面积</h3>\n<p>在完成图像阈值分割后，就可以对<strong>被识别为目标信号的区域</strong>进行定量测量，例如面积、平均灰度值或灰度范围等。这些指标常用于评估荧光信号的分布和强度。</p>\n<h4>操作步骤</h4>\n<h5>1. 设置阈值</h5>\n<p>回到之前分离得到的 <strong>红色通道图像（血管信号）</strong>，并再次对其设置阈值。在大多数情况下，<strong>默认阈值设置即可满足本示例的分析需求</strong>。</p>\n<h5>2. 进行初始测量</h5>\n<p>在菜单栏中选择：<code>Analyze → Measure</code>，此时会弹出 <strong>Results（结果）窗口</strong>，显示当前图像的测量数据。</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-9.png\" alt=\"荧光染色的面积与强度测量-20260312-9.png\"></p>\n<p>💡需要注意的是：<strong>默认情况下，Measure 命令并不会考虑阈值设置</strong>，而是对<strong>整张图像</strong>进行统计。</p>\n<p>因此当前结果通常包括：</p>\n<ul>\n<li><strong>Area</strong>：整幅图像的面积</li>\n<li><strong>Mean Gray Value</strong>：整幅图像的平均灰度值</li>\n<li><strong>Min / Max Gray Value</strong>：图像中最小和最大灰度值</li>\n</ul>\n<p>由于本示例图像<strong>未进行空间标定（uncalibrated）</strong>，面积单位为 <strong>像素（pixels）</strong>。例如结果显示约 <strong>1.92 megapixels</strong>，说明该图像来自约 <strong>192 万像素的相机</strong>。</p>\n<h5>3. 打开测量参数设置</h5>\n<p>在 <strong>Results 窗口</strong>中右键点击窗口，选择 <strong>Set Measurements</strong>。</p>\n<p>🏷️也可以通过菜单路径：<code>Analyze → Set Measurements</code>打开同一设置窗口。</p>\n<h5>4. 设置测量选项</h5>\n<p>在 <strong>Set Measurements</strong> 对话框中，可以选择需要计算的测量指标，同时也可以限制测量范围。请进行以下设置：</p>\n<ul>\n<li>勾选 <strong>Limit to Threshold</strong>（仅测量阈值区域）</li>\n<li>勾选 <strong>Area Fraction</strong>（面积比例）</li>\n</ul>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-10.png\" alt=\"荧光染色的面积与强度测量-20260312-10.png\"></p>\n<p>完成后点击 <strong>OK</strong>。</p>\n<p>这些选项的作用是：</p>\n<ul>\n<li><strong>Limit to Threshold</strong>：只对当前阈值选中的区域进行测量</li>\n<li><strong>Area Fraction</strong>：计算阈值区域占整幅图像的百分比</li>\n</ul>\n<h5>5. 重新测量图像</h5>\n<p>再次执行：<code>Analyze → Measure</code>，这一次得到的测量结果将<strong>仅针对阈值选中的区域</strong>。</p>\n<p><img src=\"/article-assets/fiji-8/%E8%8D%A7%E5%85%89%E6%9F%93%E8%89%B2%E7%9A%84%E9%9D%A2%E7%A7%AF%E4%B8%8E%E5%BC%BA%E5%BA%A6%E6%B5%8B%E9%87%8F-20260312-11.png\" alt=\"荧光染色的面积与强度测量-20260312-11.png\"></p>\n<p>结果通常包括：</p>\n<ul>\n<li><strong>Area</strong>：阈值区域的总面积</li>\n<li><strong>Mean Gray Value</strong>：阈值区域的平均灰度值（反映平均荧光强度）</li>\n<li><strong>Min / Max Gray Value</strong>：阈值区域的灰度范围</li>\n<li><strong>Area Fraction</strong>：阈值区域占整个图像面积的比例</li>\n</ul>\n<p>测量结果可以导出为：<strong>Excel 文件</strong>或<strong>TXT 文件</strong>以便后续统计分析。</p>\n<p>💡注意：由于当前图像<strong>没有进行空间尺度校准</strong>，<strong>Area 的单位为像素（pixels）</strong>，如果需要得到实际面积（例如 <strong>µm²</strong>），需要在 Fiji 中先进行 <strong>Set Scale（设置比例尺）</strong> 操作。</p>\n<p>以上就是本期的所有内容啦！欢迎继续关注，下一篇我们可以继续为大家分享 Fiji 的实用教程。</p>\n<p>本文部分内容参考了 Nowell 撰写的 <em>Fiji Training Manual (v6.5)</em>（Monash University, 2023），并据此整理说明。</p>\n"
+  },
+  {
     "slug": "colocalization-scatter-plot",
     "title": "快速绘制共定位散点图：一分钟搞定细胞内信号分布分析！",
     "description": "共定位散点图是一种可视化技术，用于展示两种不同信号在图像中的空间相关性。",
@@ -631,20 +668,20 @@ export const posts: Post[] = [
   }
 ];
 
-export const categories = ["全部","细胞生物学","生物信息学","科研绘图与分析","CADD","软件工具"] as const;
+export const categories = ["全部","科研绘图与分析","细胞生物学","生物信息学","CADD","软件工具"] as const;
 
 export const tags: TagSummary[] = [
   {
     "name": "科研绘图",
-    "count": 8
+    "count": 9
   },
   {
     "name": "数据分析",
-    "count": 8
+    "count": 9
   },
   {
     "name": "Fiji",
-    "count": 7
+    "count": 8
   },
   {
     "name": "生信分析",
