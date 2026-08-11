@@ -159,6 +159,13 @@ button { color: inherit; }
 .archive-summary { color: var(--muted); display: flex; font-size: 9px; justify-content: space-between; letter-spacing: .12em; margin: 52px 0 18px; text-transform: uppercase; }
 .archive-grid { grid-template-columns: repeat(3, 1fr); }
 .archive-grid .article-card { margin-bottom: -1px; }
+.pagination { align-items: center; border-top: 1px solid var(--ink); display: flex; justify-content: space-between; margin-top: 52px; padding-top: 24px; }
+.pagination button { background: transparent; border: 1px solid var(--line); color: var(--ink); cursor: pointer; font-size: 10px; min-height: 40px; padding: 10px 14px; transition: background .2s, border-color .2s, color .2s; }
+.pagination button:hover:not(:disabled), .pagination button[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: white; }
+.pagination button:disabled { cursor: not-allowed; opacity: .32; }
+.pagination-pages { align-items: center; display: flex; gap: 7px; }
+.pagination-pages button { min-width: 40px; padding-left: 10px; padding-right: 10px; }
+.pagination-ellipsis { color: var(--muted); display: inline-grid; min-width: 24px; place-items: center; }
 .empty-state { border: 1px solid var(--line); display: grid; min-height: 260px; place-content: center; text-align: center; }
 .empty-state span { font-family: Georgia, "Songti SC", serif; font-size: 25px; }
 .empty-state button { background: transparent; border: 0; color: var(--red); cursor: pointer; margin-top: 20px; text-decoration: underline; }
@@ -333,6 +340,9 @@ button { color: inherit; }
   .tag-cloud button { flex: 0 0 auto; }
   .archive-summary { align-items: flex-start; gap: 16px; }
   .archive-summary > div { align-items: flex-end; flex-direction: column; gap: 8px; }
+  .pagination { flex-wrap: wrap; gap: 14px; }
+  .pagination-pages { justify-content: center; order: 3; width: 100%; }
+  .pagination button { min-height: 38px; }
 }
 
 

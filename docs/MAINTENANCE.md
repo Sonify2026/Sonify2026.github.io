@@ -45,6 +45,10 @@ npm run build:github
 
 ## 同步发布
 
+Windows 用户可以直接双击项目根目录中的 `同步文章到GitHub.bat`。脚本会自动读取文章、检查网站、生成发布版本并推送到 GitHub；网站通常会在一两分钟后更新。
+
+也可以继续手动执行：
+
 ```bash
 git add .
 git commit -m "发布：文章标题"
