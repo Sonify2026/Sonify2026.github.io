@@ -1367,7 +1367,8 @@ export const posts: Post[] = [
     "tags": [
       "数据分析",
       "科研绘图",
-      "Fiji"
+      "ModFit",
+      "流式细胞术"
     ],
     "date": "2025-11-22",
     "dateLabel": "2025.11.22",
@@ -1692,11 +1693,11 @@ export const tags: TagSummary[] = [
   },
   {
     "name": "流式细胞术",
-    "count": 17
+    "count": 18
   },
   {
     "name": "Fiji",
-    "count": 14
+    "count": 13
   },
   {
     "name": "FlowJo",
@@ -1704,7 +1705,7 @@ export const tags: TagSummary[] = [
   },
   {
     "name": "ModFit",
-    "count": 5
+    "count": 6
   },
   {
     "name": "生信分析",
