@@ -667,6 +667,38 @@ export const posts: Post[] = [
     "html": "<blockquote>\n<p>[!Tip] 引言\n在工作和学习中，PDF 文件是我们常常会接触到的一种文档格式。尽管它稳定、通用，但有时我们会遇到一些烦人的水印，影响阅读体验，或者需要处理的 PDF 文件太大，不方便分享。那么有没有简单的方法，能够很方便的去除PDF文件中的水印呢？答案是：有！今天，我们将带你了解如何使用 Python 和 PyMuPDF 库来解决这些问题。</p>\n</blockquote>\n<h3 id=\"实现思路\">实现思路</h3>\n<p>我们的主要目标有两个：</p>\n<ol>\n<li><strong>去除水印</strong>：遍历 PDF 的每个页面，将水印像素转变为白色。</li>\n<li><strong>压缩 PDF 文件</strong>：保持图像的分辨率不变，通过调整 JPEG 压缩率生成更小的 PDF 文件。</li>\n</ol>\n<p>具体实现分为以下几步：</p>\n<ol>\n<li>打开 PDF 文件，提取每一页作为图像。</li>\n<li>遍历图像的每个像素，将PDF水印中的RGB改为 (255, 255, 255) 即白色。</li>\n<li>保存去除水印后的图像，并使用 JPEG 压缩。</li>\n<li>将处理后的图像重新组合成 PDF 文件，并启用 PDF 内置压缩。</li>\n</ol>\n<p>本例中我们下载到一篇带水印的文献，如下所示：\n<img src=\"/article-assets/tools-1/Pasted%20image%2020240907182413%201.png\" alt=\"Pasted image 20240907182413 1.png\">\n先查看一下文档中水印的RGB值，可以使用微信的截图工具很方便的查看，</p>\n<h3 id=\"核心代码解析\">核心代码解析</h3>\n<p>以下是核心代码，展示如何去除 PDF 水印并生成体积较小的 PDF 文件：</p>\n<pre><code class=\"language-python\">import fitz  # PyMuPDF  \nfrom itertools import product  \nimport os  \n  \ndef remove_watermark_from_page(page, zoom=12.0):  \n    mat = fitz.Matrix(zoom, zoom)  \n    pix = page.get_pixmap(matrix=mat, alpha=False)  # alpha=False 以减少内存占用  \n    for pos in product(range(pix.width), range(pix.height)):  \n        if sum(pix.pixel(pos[0], pos[1])) &gt;= 660:  # 调整阈值  \n            pix.set_pixel(pos[0], pos[1], (255, 255, 255))  # 设置为白色  \n    return pix  \n  \ndef remove_pdf_watermark(input_pdf, output_dir, zoom=12.0):  \n    try:  \n        os.makedirs(output_dir, exist_ok=True)  \n        pdf_file = fitz.open(input_pdf)  \n  \n        for page_no in range(len(pdf_file)):  \n            page = pdf_file[page_no]  \n            pix = remove_watermark_from_page(page, zoom=zoom)  \n            output_image_path = os.path.join(output_dir, f&quot;{page_no}.jpg&quot;)  \n            # 使用高压缩率保存 JPEG 图像  \n            pix.save(output_image_path, &quot;jpeg&quot;, quality=75)  # quality 参数控制 JPEG 压缩率  \n            print(f&#39;第 {page_no} 页处理并保存为 {output_image_path}&#39;)  \n  \n        pdf_file.close()  \n    except Exception as e:  \n        print(f&quot;去水印过程中出错: {e}&quot;)  \n  \ndef images_to_pdf(images_dir, output_pdf):  \n    try:  \n        pdf = fitz.open()  \n        img_files = sorted(os.listdir(images_dir), key=lambda x: int(x.split(&#39;.&#39;)[0]))  \n  \n        for img in img_files:  \n            img_path = os.path.join(images_dir, img)  \n            img_pix = fitz.Pixmap(img_path)  \n  \n            # 创建与图像大小匹配的新页面  \n            pdf_page = pdf.new_page(width=img_pix.width, height=img_pix.height)  \n  \n            # 将图像插入到 PDF 页面中  \n            pdf_page.insert_image(pdf_page.rect, pixmap=img_pix, keep_proportion=True)  \n            print(f&quot;{img} 已添加到 PDF。&quot;)  \n  \n        pdf.save(output_pdf, deflate=True)  # 使用 deflate 压缩  \n        pdf.close()  \n        print(f&quot;PDF 已成功创建: {output_pdf}&quot;)  \n    except Exception as e:  \n        print(f&quot;创建 PDF 时出错: {e}&quot;)  \n  \nif __name__ == &#39;__main__&#39;:  \n    input_pdf = &quot;test.pdf&quot;  \n    output_dir = &quot;./watermark_removed_images&quot;  \n    output_pdf = &quot;result_no_watermark.pdf&quot;  \n  \n    remove_pdf_watermark(input_pdf, output_dir, zoom=12.0)  \n    images_to_pdf(output_dir, output_pdf)\n</code></pre>\n<p>运行后，<code>watermark_removed_images</code>文件夹中是去除水印后的图像，<code>result_no_watermark.pdf</code>为去除水印后的PDF文件。下图为去掉水印的效果，可以看到水印已经去除的非常干净，也保持了高清晰度。</p>\n<p><img src=\"/article-assets/tools-1/Pasted%20image%2020240907182015%201.png\" alt=\"Pasted image 20240907182015 1.png\"></p>\n<h3 id=\"功能亮点\">功能亮点</h3>\n<ol>\n<li><strong>保持高分辨率</strong>：在处理时保持 PDF 的图像的高分辨率，代码中通过<code>zoom=12.0</code>设置图像的dpi=1200，确保文档质量不会因为水印去除而受损。实际使用时可以根据需要调整该值。</li>\n<li><strong>灵活压缩</strong>：利用 JPEG 压缩算法，通过调整压缩率来实现文件体积的控制，通常 <code>quality=75</code> 是一个较为理想的数值，既保持了图像质量，又有效减小了文件体积。</li>\n<li><strong>内置压缩</strong>：利用 PyMuPDF 的 <code>deflate</code> 压缩功能，进一步优化生成的 PDF 文件大小。</li>\n</ol>\n<h3 id=\"总结\">总结</h3>\n<p>通过使用 Python 和 PyMuPDF，我们可以轻松去除 PDF 文件中的水印，并生成体积较小的高质量 PDF 文件。这种方法适合处理需要去水印且对文件大小敏感的场景，比如上传限制或文件传输要求。希望本教程能够帮助到你在日常工作中更好地处理 PDF 文档！</p>\n<p>如果你觉得这篇文章有帮助，欢迎点赞并分享给更多有需要的小伙伴~</p>\n"
   },
   {
+    "slug": "fiji-12",
+    "title": "ImageJ实用技巧：快速掌握为图像添加比例尺的方法！",
+    "description": "还在 PPT 手动画比例尺？ImageJ 一键给显微图片加标尺，单位精准不翻车，再也不怕审稿人指出标尺错误。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2024-03-21",
+    "dateLabel": "2024.03.21",
+    "readingTime": "3 分钟阅读",
+    "toc": [
+      {
+        "id": "校准图像-已知像素大小",
+        "text": "▌校准图像--已知像素大小",
+        "level": 2
+      },
+      {
+        "id": "校准图像-未知像素大小",
+        "text": "▌校准图像--未知像素大小",
+        "level": 2
+      },
+      {
+        "id": "添加比例尺",
+        "text": "▌添加比例尺",
+        "level": 2
+      }
+    ],
+    "html": "<p>在科研研究中，不论是做汇报还是论文发表，为了正确的呈现图像，包含比例尺都是至关重要的。在图像中添加比例尺，以便读者看到所呈现图像的比例，以获得准确的结论。本期内容小编将向大家介绍如何<strong>利用ImageJ软件轻松为科研图像添加比例尺</strong>，让你的研究工作更加精确和可靠！</p>\n<h2 id=\"校准图像-已知像素大小\">▌校准图像--已知像素大小</h2>\n<p><strong>在Image J中，默认使用的长度单位是像素，即Pixel；</strong> 我们需要对其进行校准，即使用通用的长度单位μm，mm等。这里小编所说的“已知像素大小”就是指已知像素长度和通用长度的比例。</p>\n<p>首先导入一张图片至Image J（Fiji）中；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqr4A3MfDMO75vrnSKdj8tzagByic1FjqiaJFdCNdym1dliccwprmmKsmmg/640?wx_fmt=png&from=appmsg\" alt=\"\">\n在图像的左上角会显示<strong>图像的尺寸、位深度</strong>和<strong>文件大小</strong>。在本例中图像的尺寸为<strong>1360x1024像素</strong>，我们需要将其校准，长度单位<strong>转换为μm</strong>。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqHsjG9mjngmo8aqNTK25Dp29DWKz9Mlt4xjIRr3NWud2QQohc20thHw/640?wx_fmt=png&from=appmsg\" alt=\"\">\n点击“<mark>Image -&gt; Properties</mark>”，输入单位像素对应的比例尺单位的大小，本例中一个像素对应0.6μm，就如下输入，然后点击“<mark>OK</mark>”。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwq5yfz4pJyy7NjiaPxAyVJknoYDUVtTdIOxh1FgQ3jTdLSVKmIP2C7UIg/640?wx_fmt=png&from=appmsg\" alt=\"\">\n现在可以发现图像已经被校准，显示为816.0x614.4μm，长度单位改为了我们常用的“μm”。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqH57ibticGW0P44JCkN6dDXB3bN9TPkJ2ZtSdTBRsUP7dtm8dnEpiazgSQ/640?wx_fmt=png&from=appmsg\" alt=\"\">\n需要注意的是在图像属性窗口，如果需要将属性应用于所有打开的图像直到关闭软件，可以将“<mark>Global</mark>”选项勾选。</p>\n<h2 id=\"校准图像-未知像素大小\">▌校准图像--未知像素大小</h2>\n<p>如果像素大小未知，我们就需要一张已有比例尺的图像或其它已知长度的参考图像，可以用它来计算像素大小。</p>\n<p>如下图已有一个100μm的比例尺，我们可以<strong>使用直线工具沿着比例尺进行划线</strong>，注意按住“<mark>Shift</mark>”键可保持直线，结果更准确。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqdr6nUfSCGZxOicWoCX2NwlhUu6FmO7senpTqqWlmaHyUwynhb9dZQicw/640?wx_fmt=png&from=appmsg\" alt=\"\">\n然后点击“<mark>Analyze -&gt; Set Scale…</mark>”，其中“<font color=\"#d83931\">Distance in pixels</font>”指的就是刚刚划的直线的长度；这里在“<font color=\"#d83931\">Known distance</font>”输入已知的距离，本例中比例尺是100μm，所以就输出“<mark>100</mark>”；在“<font color=\"#d83931\">Unit of length</font>”输入长度单位，本例中为“<mark>μm</mark>”；然后点击“<mark>OK</mark>”即可。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqiaJibfunkJkNvNcyAKGjt5xMb7IklmccmEvAdUiaRv345aMwO8AgEric5w/640?wx_fmt=png&from=appmsg\" alt=\"\">\n同样的可以勾选“<mark>Global</mark>”设置全局应用该设置。现在图像就校准好了，可以添加比例尺啦。</p>\n<h2 id=\"添加比例尺\">▌添加比例尺</h2>\n<p>导入图像后，点击“<mark>Analyse -&gt; Tools -&gt; Scale Bar</mark>”，在打开的对话框中输出比例尺的详细信息。本例中设置了一个6像素粗细（Thickness in pixels）100μm（Width in μm）的比例尺，字体的大小为14（Font size），并加粗（Bold Text）。</p>\n<p>还可以选择添加一个垂直的比例尺，本例中为50μm（Height in μm），注意勾选“<mark>Vertical</mark>”。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqemC7cKUQQcRAcuwjHibaEBFWlia5BTOIpfBMYWtsI1hphoUeIVOVMBxA/640?wx_fmt=png&from=appmsg\" alt=\"\">\n大家可根据自己的需要进行设置，下图为本例添加完成的比例尺，之后进行图像保存即可。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzYycyicK3JdMpR8IPYM6cwqD3ex1sb2hFMEfsa40os9P2o3ibiaVJdbgO8Ejc21D3lkfjNX7ZYj7u7w/640?wx_fmt=png&from=appmsg\" alt=\"\">\n如果不喜欢比例尺默认的位置，可以在图像上画一条ROI线，然后在“<mark>Location</mark>”的下拉菜单中选择“<mark>At Selection</mark>”即可。</p>\n"
+  },
+  {
     "slug": "fiji-9",
     "title": "Image J进行荧光共定位的定量分析--强度分布曲线",
     "description": "只算 Pearson 系数还不够！用 Fiji 强度分布曲线直观展示两种荧光信号的共定位重合情况，为共定位结果增加可视化证据。",
@@ -681,6 +713,28 @@ export const posts: Post[] = [
     "readingTime": "2 分钟阅读",
     "toc": [],
     "html": "<p><strong>荧光共定位</strong>是一种技术，通过不同波长的荧光染料标记细胞内的不同成分，然后观察这些成分在空间上是否重叠或相邻。这项技术对于研究蛋白质间的相互作用及其在细胞内的分布非常有价值。  </p>\n<p><strong>Line Intensity Profile，也称为强度分布曲线，</strong> 是通过沿着图像上特定直线路径（用户自定义）收集的强度信息。换句话说，就是<strong>在图像的一个切线上测量并绘制该线上各点的亮度值</strong>。这通常用于对比荧光标记物的局部强度，以确定它们在空间上是否有共定位趋势。\n<img src=\"/article-assets/fiji-9/Pasted%20image%2020251119171058.png\" alt=\"Pasted image 20251119171058.png\"><br>例如，假设你有一个细胞样本，用两种不同颜色的荧光染料分别标记了两种蛋白质。你可以选择一条穿过感兴趣区域的线，然后用<strong>Line Intensity Profile</strong>来描绘沿这条直线的荧光强度。如果这两种不同色彩的强度分布曲线在图表上显现出<strong>高度重叠</strong>，那么可以推断这两种蛋白在那个局部区域有<strong>较高的共定位程度</strong>。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG133jXH24NQbp4CxxUHsiaD68j1clgXia3VialvVd54RvBpJZ82ZhT4KjQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=1\" alt=\"图片\">\n本期内容小编就为大家分享<strong>如何在Fiji (ImageJ)中快速绘制出文献中常见的荧光共定位图像中的Line Intensity Profile</strong>。</p>\n<p>将需要分析的图像导入至ImageJ中，本例中为两张荧光图像，分别为红色和绿色通道荧光图像；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG4UeiaC3HqiasRUSNGibQz83rIs3E6nbNPn8kNUenhoavBl8dnnec1aEkw/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=2\" alt=\"图片\">\n使用直线工具在图像需要分析的部分画一条ROI直线；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGHXZ4gFRCAq0ic2Iic7hWLib7CMdFwFw2H7uqWHqrCPrFavcOC8shB4Kmg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=3\" alt=\"图片\">\n点击“<font color=\"#de7802\">Analyze -&gt; Plot Profile</font>”即可绘制强度分布曲线；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGtaeTWHKHdLdCq2HhicxgianTtRsvw1TfU3LVibDGfyueibSvWjiczrKlsmg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=4\" alt=\"图片\">\n这里对应的是绿色荧光图像，因此我们将曲线的颜色更改为绿色。在图像下方的工具栏点击“<font color=\"#de7802\">More -&gt; Contents Style</font>”，在打开的窗口中更改“<font color=\"#de7802\">Color</font>”为“<font color=\"#de7802\">green</font>”；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGB468rfytRDWklQzHqbhlwANgMUqzKzIEKr9VnZKPz9lHTkgtEzUAfA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=5\" alt=\"图片\">\n接下来，对红色荧光图像也进行分析，可以使用&quot;<font color=\"#de7802\">ROI Manager</font>&quot;控制在两张图像同样的位置绘制直线。  </p>\n<p>绘制完成后，在图像下方的工具栏点击“<font color=\"#de7802\">Data -&gt; Add from Plot</font>”将红色荧光的曲线添加至第一张图像中并修改颜色为红色；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGFKCZHQ1OEtnCaTItaQgoW2LWtjVzIYIf4cibb94uFJ2ZbAheo5t8ibrQ/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=6\" alt=\"图片\">\n根据绘图需要可以对图像进行细节上的修改，点击“<font color=\"#de7802\">More -&gt; High-Resolution Plot</font>”生成清晰的图像，之后进行保存即可。<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGk7Zn21HTmlMsbuiaGhvR9LWY5Usu0mebTtWhTNuFZ6iaoT9hyVM5SbFA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=7\" alt=\"图片\">\n<img src=\"https://mmbiz.qpic.cn/mmbiz_jpg/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG8febYtDwBDia8eMEKVq9AWLkj7jSiczezG9ulnrj93YYHCgoUEGC9kMg/640?wx_fmt=jpeg&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=8\" alt=\"图片\"></p>\n"
+  },
+  {
+    "slug": "fiji-13",
+    "title": "用ImageJ的3D Surface Plot可视化荧光图像！",
+    "description": "荧光信号强弱看不出差异？试试 ImageJ 的 3D Surface Plot，把荧光强度变成立体曲面，信号高低一目了然，SCI 配图又多一个高级画法。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2024-03-12",
+    "dateLabel": "2024.03.12",
+    "readingTime": "2 分钟阅读",
+    "toc": [
+      {
+        "id": "imagej绘制3d-surface-plot",
+        "text": "▌ImageJ绘制3D Surface Plot",
+        "level": 2
+      }
+    ],
+    "html": "<p>在生物医学领域，图像分析是一项关键的任务，旨在获取准确的生物标记物表达信息并从中提取有关细胞或组织状态的重要信息。ImageJ是一个强大的开源软件，广泛用于处理和分析科学图像，包括生物学领域中的图像。<strong>3D Surface Plot（三维曲面图）是一种用于可视化三维数据的图表类型</strong> 。   ImageJ就提供了绘制3D Surface Plot的工具，它提供了<strong>从二维图像中提取的三维数据的视觉表示</strong>。这个工具在你想分析图像数据的地形或强度分布时特别有用。</p>\n<p>例如，如果你在处理荧光显微镜图像，3D Surface Plot可以帮助可视化细胞或组织切片中荧光信号的强度。这种可视化可能会揭示某些蛋白质、细胞器或其他细胞成分的分布和密度。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGxOMG2Lrt3awRcz9DgFws7ewygsqk5uVz284cjx340ojI3icRStyqibHA/640?wx_fmt=png\" alt=\"\">\n本期内容小编为大家分享在Fiji（ImageJ）中快速绘制3D Surface Plot的方法！</p>\n<h2 id=\"imagej绘制3d-surface-plot\">▌ImageJ绘制3D Surface Plot</h2>\n<p>在ImageJ中可以非常轻松的实现3D Surface Plot的绘制，首先，使用ImageJ打开需要分析的图片；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGvr3lckhyV1jp3LzVNhWG5tSRI9YWaJQqbeicYUz5Ywk0Kr1e2G5wygw/640?wx_fmt=png&from=appmsg\" alt=\"\">\n在菜单栏点击“<mark>Analyze -&gt; 3D Surface Plot</mark>”即可绘制3D Surface Plot；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGAEqp9WnCnCIDXhcKTK6JuM0RIm9xrAWqSIKGgAZia4icEcXgpM67j4AA/640?wx_fmt=png&from=appmsg\" alt=\"\">\n默认视图以原始LUT颜色（在本例中为灰色）显示图像。根据原始图像中的分辨率和强度范围，更改网格大小（<strong>Grid Size</strong>）和平滑（<strong>Smoothing</strong>）可以更好地展示数据。</p>\n<p>在界面上方的工具栏可以更细致的对图像进行调整。如更改曲面图的显示模式：</p>\n<ul>\n<li><strong>Dots（点模式）：</strong> 所有像素都绘制为小点；</li>\n<li><strong>Lines（线模式）：</strong> 在x方向将像素连接；；</li>\n<li><strong>Mesh（网格模式）：</strong> 所有像素在 x 和 y 方向上连接；</li>\n<li><strong>Filled（填充模式）：</strong> 所有像素相连，连接成完整的面。</li>\n</ul>\n<p>还可以随心所欲地转换显示颜色，从原色到灰度，再到各式各样的LUT选择，只要一键切换，即可带来截然不同的视觉效果。还可更改其它的图像属性，如网格大小、绘图高度、坐标轴、背景等，大家可自行尝试调节。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXxmaEoKS9H49ApnnDbabCibcDVhBIUb5YBHOecpl9rXYFF1PtoVtd2Tibe0bzdI81JicSEtiagZymapaQ/640?wx_fmt=png&from=appmsg\" alt=\"\">\n修改完成后，点击“<mark>Save Plot</mark>”即可保存图像。</p>\n"
   },
   {
     "slug": "fiji-11",
@@ -727,15 +781,15 @@ export const categories = ["全部","科研绘图与分析","细胞生物学","�
 export const tags: TagSummary[] = [
   {
     "name": "科研绘图",
-    "count": 12
+    "count": 14
   },
   {
     "name": "数据分析",
-    "count": 12
+    "count": 14
   },
   {
     "name": "Fiji",
-    "count": 11
+    "count": 13
   },
   {
     "name": "生信分析",
