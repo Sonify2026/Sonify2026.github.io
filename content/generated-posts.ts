@@ -681,6 +681,44 @@ export const posts: Post[] = [
     "readingTime": "2 分钟阅读",
     "toc": [],
     "html": "<p><strong>荧光共定位</strong>是一种技术，通过不同波长的荧光染料标记细胞内的不同成分，然后观察这些成分在空间上是否重叠或相邻。这项技术对于研究蛋白质间的相互作用及其在细胞内的分布非常有价值。  </p>\n<p><strong>Line Intensity Profile，也称为强度分布曲线，</strong> 是通过沿着图像上特定直线路径（用户自定义）收集的强度信息。换句话说，就是<strong>在图像的一个切线上测量并绘制该线上各点的亮度值</strong>。这通常用于对比荧光标记物的局部强度，以确定它们在空间上是否有共定位趋势。\n<img src=\"/article-assets/fiji-9/Pasted%20image%2020251119171058.png\" alt=\"Pasted image 20251119171058.png\"><br>例如，假设你有一个细胞样本，用两种不同颜色的荧光染料分别标记了两种蛋白质。你可以选择一条穿过感兴趣区域的线，然后用<strong>Line Intensity Profile</strong>来描绘沿这条直线的荧光强度。如果这两种不同色彩的强度分布曲线在图表上显现出<strong>高度重叠</strong>，那么可以推断这两种蛋白在那个局部区域有<strong>较高的共定位程度</strong>。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG133jXH24NQbp4CxxUHsiaD68j1clgXia3VialvVd54RvBpJZ82ZhT4KjQ/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=1\" alt=\"图片\">\n本期内容小编就为大家分享<strong>如何在Fiji (ImageJ)中快速绘制出文献中常见的荧光共定位图像中的Line Intensity Profile</strong>。</p>\n<p>将需要分析的图像导入至ImageJ中，本例中为两张荧光图像，分别为红色和绿色通道荧光图像；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG4UeiaC3HqiasRUSNGibQz83rIs3E6nbNPn8kNUenhoavBl8dnnec1aEkw/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=2\" alt=\"图片\">\n使用直线工具在图像需要分析的部分画一条ROI直线；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGHXZ4gFRCAq0ic2Iic7hWLib7CMdFwFw2H7uqWHqrCPrFavcOC8shB4Kmg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=3\" alt=\"图片\">\n点击“<font color=\"#de7802\">Analyze -&gt; Plot Profile</font>”即可绘制强度分布曲线；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGtaeTWHKHdLdCq2HhicxgianTtRsvw1TfU3LVibDGfyueibSvWjiczrKlsmg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=4\" alt=\"图片\">\n这里对应的是绿色荧光图像，因此我们将曲线的颜色更改为绿色。在图像下方的工具栏点击“<font color=\"#de7802\">More -&gt; Contents Style</font>”，在打开的窗口中更改“<font color=\"#de7802\">Color</font>”为“<font color=\"#de7802\">green</font>”；\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGB468rfytRDWklQzHqbhlwANgMUqzKzIEKr9VnZKPz9lHTkgtEzUAfA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=5\" alt=\"图片\">\n接下来，对红色荧光图像也进行分析，可以使用&quot;<font color=\"#de7802\">ROI Manager</font>&quot;控制在两张图像同样的位置绘制直线。  </p>\n<p>绘制完成后，在图像下方的工具栏点击“<font color=\"#de7802\">Data -&gt; Add from Plot</font>”将红色荧光的曲线添加至第一张图像中并修改颜色为红色；<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGFKCZHQ1OEtnCaTItaQgoW2LWtjVzIYIf4cibb94uFJ2ZbAheo5t8ibrQ/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=6\" alt=\"图片\">\n根据绘图需要可以对图像进行细节上的修改，点击“<font color=\"#de7802\">More -&gt; High-Resolution Plot</font>”生成清晰的图像，之后进行保存即可。<br><img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwPTuL2quguH2DfU4WQbjSGk7Zn21HTmlMsbuiaGhvR9LWY5Usu0mebTtWhTNuFZ6iaoT9hyVM5SbFA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=7\" alt=\"图片\">\n<img src=\"https://mmbiz.qpic.cn/mmbiz_jpg/kaukJDVZNXwPTuL2quguH2DfU4WQbjSG8febYtDwBDia8eMEKVq9AWLkj7jSiczezG9ulnrj93YYHCgoUEGC9kMg/640?wx_fmt=jpeg&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1#imgIndex=8\" alt=\"图片\"></p>\n"
+  },
+  {
+    "slug": "fiji-11",
+    "title": "ImageJ神器加持，图像去噪插件快速安装，荧光图像秒变高清！",
+    "description": "荧光图噪点多画质差？Fiji 专业降噪插件一键安装上手，弱荧光共聚焦图片秒变高清，避开 SCI 图片处理雷区。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2024-01-25",
+    "dateLabel": "2024.01.25",
+    "readingTime": "2 分钟阅读",
+    "toc": [],
+    "html": "<p>在上一期“<a href=\"/articles/fiji-10\">用ImageJ轻松去噪，荧光图像更清晰！</a>”的推文中，小编为大家分享了使用ImageJ插件--<strong>Noise2Noise Denoising</strong>以及<strong>DnCNN Denoising</strong>进行荧光图像去噪的方法，有小伙伴留言<strong>ImageJ软件内更新失败，无法成功安装插件</strong>。本期内容就为大家分享这两款插件的另一种安装方法。</p>\n<ol>\n<li>首先在GitHub上下载“<strong>step1 files.zip</strong>”，地址如下：</li>\n</ol>\n<pre><code>https://github.com/ND-HowardGroup/Instant-Image-Denoising/blob/master/Plugins/Installation_steps/step1%20files.zip\n</code></pre>\n<p>下载好压缩包后，解压，step1 files文件夹中包含以下文件：\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzl23CdwHBic1TyiclnJ6X3tjSic2bSibCjXVsCxBAyhR8wws5ia1icyQeviaKfNeFMhO8NS68TaFLBoEPsg/640?wx_fmt=png&from=appmsg\" alt=\"\">\n复制文件夹中的所有文件至<strong>Fiji或imageJ的plugins文件夹</strong>中（plugins文件夹可在Fiji或imageJ的安装路径中找到）。</p>\n<p>2. 在GitHub上下载“<strong>step2 files.zip</strong>”，地址如下：</p>\n<pre><code>https://github.com/ND-HowardGroup/Instant-Image-Denoising/blob/master/Plugins/Installation_steps/step2%20files.zip\n</code></pre>\n<p>下载好压缩包后，解压，step2 files文件夹中包含以下文件：\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzl23CdwHBic1TyiclnJ6X3tjiau0ltiaiaNSqkibEHQNWGGWRibXdMbyZ8VtTdhkNGLCiajVd9vHCVsarJPQ/640?wx_fmt=png&from=appmsg\" alt=\"\">\n这两个文件夹是两款插件的模型，我们需要将这两个文件夹复制至<strong>Fiji或imageJ的models文件夹</strong>中。</p>\n<p>注：如果你的安装路径没有models这个文件夹，就新建一个新的文件夹命名为“models”即可。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzl23CdwHBic1TyiclnJ6X3tjFnFVzNa9zInJmjhJ7ic2fkbbWKlzRXklMZ4QvlKLvXUPq7vLdamKibHw/640?wx_fmt=png&from=appmsg\" alt=\"\">\n之后<strong>重启Fiji/ImageJ</strong>软件，就可以使用这两款插件啦。\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXzl23CdwHBic1TyiclnJ6X3tjP5gayF8wwLSIjib13ml7CMenIQ6ibSkwSdJhugOT75lCD9icgoRyJhclA/640?wx_fmt=png&from=appmsg\" alt=\"\">\n不方便使用GitHub的小伙伴也无需担心，小编已经替大家下载好了这两款插件，需要的小伙伴可以在留言区自取！\n<img src=\"https://mmbiz.qpic.cn/mmbiz_png/kaukJDVZNXwlzJfic0v2wdabGwkevaFibg2lzYsobQhZ7d60GpDlibiahCcdyA2wIswhgVQeOMKcKqzqsGs3uUGCoA/640?wx_fmt=png&from=appmsg\" alt=\"\"></p>\n<blockquote>\n<p>参考资料：</p>\n<p>Mannam V, Zhang Y, Zhu Y, et al. Real-time image denoising of mixed Poisson–Gaussian noise in fluorescence microscopy images using ImageJ[J]. Optica, 2022, 9(4): 335-345.</p>\n</blockquote>\n"
+  },
+  {
+    "slug": "fiji-10",
+    "title": "用ImageJ轻松去噪，荧光图像更清晰！",
+    "description": "荧光图片背景噪点多、颗粒感重？ImageJ 降噪方法实操，降低杂讯，同时守住 SCI 图片处理红线，不破坏真实信号。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2024-01-23",
+    "dateLabel": "2024.01.23",
+    "readingTime": "2 分钟阅读",
+    "toc": [
+      {
+        "id": "插件安装",
+        "text": "插件安装",
+        "level": 2
+      }
+    ],
+    "html": "<p>荧光显微镜的限制之一就是系统固有的噪点，这往往成为影响图像质量和获取真实信息的主要挑战。Fiji是ImageJ的一个增强版，包含了众多功能强大的插件和工具，可用于更高级的图像处理。本期内容小编为大家分享一个超实用的技巧，让你轻松用ImageJ去除荧光图像上的噪点，让你的图像更清晰更专业！快来看看吧！</p>\n<h2 id=\"插件安装\">插件安装</h2>\n<p>在菜单栏点击<strong>Help -&gt; Update</strong>打开<strong>ImageJ Updater</strong>窗口，点击右下角的<strong>Manage update sites</strong>；\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123103033.png\" alt=\"Pasted image 20240123103033.png\">\n找到名称为<strong>TensorFlow</strong>这一行， URL是 <a href=\"https://sites.imagej.net/TensorFlow/\">https://sites.imagej.net/TensorFlow/</a>，勾选该站点，点击<strong>Apply and Close</strong>等待软件更新完成。\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123103408.png\" alt=\"Pasted image 20240123103408.png\">\n更新成功后，重启软件。在菜单栏点击<strong>Edit -&gt; Options -&gt; TensorFlow</strong>；\n在新弹出的窗口中选择合适的<strong>TF版本</strong>，这里就根据自己系统的情况进行选择；\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123103915.png\" alt=\"Pasted image 20240123103915.png\">\n比如小编这里是<strong>CUDA 11.4</strong>所以直接选择了最新的<strong>TF 1.15.0 GPU</strong>；需要注意的是，<strong>Mac系统只支持CPU</strong>。\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123104144.png\" alt=\"Pasted image 20240123104144.png\">\n选择完成后，软件会有安装成功并重启软件的提示，关闭软件。\n下面我们就可以安装去噪插件啦，首先从GitHub上下载插件，地址如下：</p>\n<p>[网站] <a href=\"https://github.com/ND-HowardGroup/Instant-Image-Denoising/tree/master/Plugins/Image_Denoising_Plugins_Journal/Plugin_Targets\">https://github.com/ND-HowardGroup/Instant-Image-Denoising/tree/master/Plugins/Image_Denoising_Plugins_Journal/Plugin_Targets</a>\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123104954.png\" alt=\"Pasted image 20240123104954.png\">\n将下载好的​​ <strong>.jar</strong>文件复制到Fiji软件安装目录下的<strong>Plugins</strong>文件夹下。\n重新打开软件，就可以在 <strong>”Plugins“</strong> 菜单栏下找到安装号的去噪插件：<strong>Noise2Noise Denoising</strong>以及<strong>DnCNN Denoising</strong>。\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123111638.png\" alt=\"Pasted image 20240123111638.png\">\n现在导入图像至Fiji中，运行插件即可实现图片的去噪，下面是一张灰度图像的去噪效果，还是挺明显的。\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123111835.png\" alt=\"Pasted image 20240123111835.png\">\n下面是使用Noise2Noise denoising插件对彩色图像去噪的效果。\n<img src=\"/article-assets/fiji-10/Pasted%20image%2020240123112152.png\" alt=\"Pasted image 20240123112152.png\"></p>\n<blockquote>\n<p>Mannam V, Zhang Y, Zhu Y, et al. Real-time image denoising of mixed Poisson–Gaussian noise in fluorescence microscopy images using ImageJ[J]. Optica, 2022, 9(4): 335-345.</p>\n</blockquote>\n"
   }
 ];
 
@@ -689,15 +727,15 @@ export const categories = ["全部","科研绘图与分析","细胞生物学","�
 export const tags: TagSummary[] = [
   {
     "name": "科研绘图",
-    "count": 10
+    "count": 12
   },
   {
     "name": "数据分析",
-    "count": 10
+    "count": 12
   },
   {
     "name": "Fiji",
-    "count": 9
+    "count": 11
   },
   {
     "name": "生信分析",
