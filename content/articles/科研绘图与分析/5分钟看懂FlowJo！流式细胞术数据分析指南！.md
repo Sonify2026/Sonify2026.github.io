@@ -18,6 +18,7 @@ draft: false
 ### 添加数据
 
 向工作区（Workspace）添加数据的最简单方法是：将包含FCS数据文件的整个文件夹直接拖拽到FlowJo工作区中（参见 _Drag Samples Here_ 区域）。
+
 ![[Pasted image 20251201175319.png]]
 
 > <font color="#de7802">📌补充说明 </font>
@@ -38,8 +39,9 @@ draft: false
 > - 常见的分组方式包括：样本名称关键字（如 Ctrl、DrugA、Day1、Day7）、管号（Tube ID）、补偿方案、实验批次等。
 >     
 > - 分组后在任意样本上建立门控策略（gating strategy）时，FlowJo会自动同步到整个分组，有利于**批量一致性分析**。
->
+
 ![[Pasted image 20251201180059.png]]
+
 ### 荧光补偿
 
 FlowJo 会自动将文件名中包含 **“comp”** 或 **“unstained”（未染）** 的样本分配到 **Compensation Group（补偿组）** 中。你也可以将其他希望作为补偿控制（comp control）的样本拖入该组。
@@ -64,13 +66,19 @@ FlowJo v10 的工具界面采用 **功能区** 设计。共有 **6 个功能区*
 用户可以通过以下方式自定义功能区：
 - 拖动工具带离开或加入功能区
 - 点击 **Customize Ribbons** 按钮，将工具带拖入任意功能区区域
+
 ![[Pasted image 20251201175453.png]]
+
 ### 注释与样本信息管理
 
 在FCS文件列表上方的 **column header（列标题）** 处右键点击，可以选择哪些 **Keywords（关键字，实验元数据）** 作为列显示在工作区中。几乎所有已显示的关键字都可以通过双击对应单元格进行编辑。
+
 ![[Pasted image 20251201180227.png]]
+
 你还可以通过工作区顶部功能区（Workspace ribbon）中的 **Keywords +** 工具，添加新的关键字或关键字集合。
+
 ![[Pasted image 20251201180301.png]]
+
 📌<font color="#de7802">补充说明</font>
 
 **Keywords（关键字）** 是FCS文件中附带的实验元数据，通常由流式细胞仪采集软件写入，包括：
@@ -104,6 +112,7 @@ FlowJo v10 的工具界面采用 **功能区** 设计。共有 **6 个功能区*
 - 使用门控工具（Gating Tools）在图上绘制门（gate）。
 - 双击绘制好的门，可打开一个仅显示门内细胞群的新图形窗口。
 - 将某个门拖动到组（Group）上，以对该组内所有样本自动应用相同的门控策略。
+
 ![[Pasted image 20251201180723.png]]
 
 > 📌<font color="#de7802">补充说明</font>
@@ -130,9 +139,14 @@ FlowJo v10 的工具界面采用 **功能区** 设计。共有 **6 个功能区*
 - **Logicle（Bi-exponential）***
 - **Hyperlog**
 - **Arcsinh（常用于 CyTOF / Mass Cytometry）**
-![[Pasted image 20251201181041.png]]![[Pasted image 20251201181413.png]]
+
+![[Pasted image 20251201181041.png]]
+![[Pasted image 20251201181413.png]]
+
 在 Transform 窗口中，你可以：调整变换参数与范围、批量应用到多个通道、保存并作为下次分析模板等。
+
 ![[Pasted image 20251201181505.png]]
+
 ### 统计表格分析
 
 在完成门控后，可以使用 **Table Editor（表格编辑器，TE）** 来创建统计结果表。点击工作区上方工具栏中的 **Table Editor** 按钮即可打开 TE。
@@ -141,7 +155,9 @@ FlowJo v10 的工具界面采用 **功能区** 设计。共有 **6 个功能区*
 - 你可以将希望统计的细胞群（population）拖拽到表格区域中。
 - 将统计参数拖入后，通过双击即可修改统计方式。
 - 当所有需要的统计项已加入后，点击 **Batch（批量）** 按钮，即可自动生成所选分组内所有样本的统计表。
+
 ![[Pasted image 20251201181803.png]]
+
 >  💡<font color="#de7802">实际应用技巧</font>
 > 
 > - 建议按 **Group（实验组）** 与 **Sample ID** 进行 Batch 输出，可快速生成用于统计分析的 CSV 或 Excel 文件。
@@ -153,10 +169,14 @@ FlowJo v10 的工具界面采用 **功能区** 设计。共有 **6 个功能区*
 >         
 > - 表格模板可以保存，适用于大型批次实验复用，提高一致性和效率。
 
+
 ### Layouts（布局与作图）
 
 **Layout Editor（布局编辑器，LE）** 是用于为一个分组内的所有 FCS 文件批量生成图像（plots）的工作区域。你可以将任意细胞群（Populations）或统计参数（Statistics）拖放到布局编辑器中，并根据需要调整排列样式。完成布局后，点击 **Batch（批量生成）** 按钮，FlowJo 将为所选分组内所有样本自动生成对应图像。
-![[Pasted image 20251201182859.png]]![[Pasted image 20251201182520.png]]
+
+![[Pasted image 20251201182859.png]]
+![[Pasted image 20251201182520.png]]
+
 > 📌<font color="#de7802">补充说明</font> 
 > 
 > Layout Editor 常用于：
@@ -177,5 +197,7 @@ FlowJo 提供多种保存方式：
 - **Template（模板）**：适用于重复实验，可自动匹配样本并复用门控策略
 - **Archive（归档压缩包）**：包含所有 FCS 文件及工作区（便于备份或分享）
 - **Excel Export（Excel 导出）**：导出表格数据用于统计分析
+
 ![[Pasted image 20251201183024.png]]
+
 希望本教程能帮助你提高数据处理效率，构建稳定可靠的分析工作流，并在未来的实验与文章中得心应手。在后续的推文中，我们将持续分享更多实战技巧与进阶案例。
