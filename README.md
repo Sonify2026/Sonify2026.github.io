@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://sonify2026.github.io/">访问网站</a> ·
   <a href="https://sonify2026.github.io/articles/">浏览文章</a> ·
+  <a href="https://sonify2026.github.io/tools/">科研工具</a> ·
   <a href="https://sonify2026.github.io/about/">关于叮当学术</a>
 </p>
 
@@ -29,6 +30,21 @@
 - **细胞生物学**：实验原理、操作方案、数据解读与常见问题。
 - **科研绘图与数据分析**：Python 绘图、图像分析和结果可视化。
 - **科研工具**：围绕高频、重复的科研任务，逐步开发简单实用的在线工具。
+
+## 在线科研工具
+
+工具无需注册账号，也无需安装软件，可直接在浏览器中使用。库存与密码库数据保存在当前浏览器中，重要数据请定期导出备份。
+
+| 工具 | 用途 | 在线使用 |
+| --- | --- | --- |
+| 细胞冻存管理 | 容器网格、批量入库、搜索与低库存预警 | [打开工具](https://sonify2026.github.io/lab-tools/tools/cell-storage/) |
+| 抗体库存管理 | 抗体位置、余量估算、移动与备份恢复 | [打开工具](https://sonify2026.github.io/lab-tools/tools/antibody-inventory/) |
+| 实验室药品管理 | 批次库存、出入库流水、到期与低库存预警 | [打开工具](https://sonify2026.github.io/lab-tools/tools/reagent-manager/) |
+| IC50 计算器 | 4PL 拟合、拟合质量指标与结果图导出 | [打开工具](https://sonify2026.github.io/lab-tools/tools/ic50_calculator/) |
+| 摩尔计算器 | 摩尔质量、质量、物质的量与浓度换算 | [打开工具](https://sonify2026.github.io/lab-tools/tools/molarity_calculator/) |
+| 离线密码库 | 本地加密、自动锁定与加密备份 | [打开工具](https://sonify2026.github.io/lab-tools/tools/vault/) |
+
+访问完整工具箱：[sonify2026.github.io/tools](https://sonify2026.github.io/tools/)
 
 ## 精选文章
 

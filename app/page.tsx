@@ -3,12 +3,7 @@ import Link from "next/link";
 import { ArticleCard } from "@/components/article-card";
 import { posts, tags } from "@/content/posts";
 import { siteConfig } from "@/content/site";
-
-const toolRoadmap = [
-  { code: "01", title: "序列处理助手", text: "FASTA 清理、反向互补、长度统计等高频序列操作。" },
-  { code: "02", title: "科研图表助手", text: "帮助整理绘图参数、配色方案与常用图表工作流。" },
-  { code: "03", title: "数据格式转换", text: "处理 CSV、TSV 与常见科研文本格式之间的转换。" },
-];
+import { labTools } from "@/content/tools";
 
 export default function Home() {
   const [featured, ...latest] = posts;
@@ -125,23 +120,24 @@ export default function Home() {
           <div className="section-heading">
             <div>
               <p className="eyebrow">RESEARCH TOOLS</p>
-              <h2 id="tools-title">科研工具实验室</h2>
+              <h2 id="tools-title">科研工具箱</h2>
             </div>
-            <p className="section-note">从反复出现的小问题开始，逐步开发真正省时间的工具。</p>
+            <Link className="text-link" href="/tools">查看全部 {labTools.length} 个工具 →</Link>
           </div>
           <div className="tool-roadmap-grid">
-            {toolRoadmap.map((tool) => (
-              <article key={tool.code}>
-                <span>{tool.code}</span>
+            {labTools.map((tool, index) => (
+              <a href={tool.href} target="_blank" rel="noreferrer" key={tool.name}>
+                <span>{(index + 1).toString().padStart(2, "0")}</span>
                 <div>
-                  <small>规划开发中</small>
-                  <h3>{tool.title}</h3>
-                  <p>{tool.text}</p>
+                  <small>{tool.category}</small>
+                  <h3>{tool.name}</h3>
+                  <p>{tool.description}</p>
+                  <strong>立即使用 ↗</strong>
                 </div>
-              </article>
+              </a>
             ))}
           </div>
-          <p className="tool-roadmap-note">工具会随着内容积累逐步上线。如果你有经常重复处理的科研任务，欢迎通过邮件告诉我。</p>
+          <p className="tool-roadmap-note">所有工具均可直接在浏览器中使用。库存类数据保存在当前浏览器，请定期导出备份。</p>
         </div>
       </section>
       <section className="manifesto" aria-label="品牌理念">

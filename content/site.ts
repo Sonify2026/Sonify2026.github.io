@@ -17,7 +17,7 @@ export const siteConfig = {
   navigation: [
     { label: "首页", href: "/" },
     { label: "文章", href: "/articles" },
-    { label: "工具", href: "/#tools" },
+    { label: "工具", href: "/tools" },
     { label: "关于", href: "/about" },
   ],
 } as const;

@@ -61,6 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <div>
                 <strong>浏览</strong>
                 <Link href="/articles">全部文章</Link>
+                <Link href="/tools">科研工具</Link>
                 <Link href="/about">关于品牌</Link>
               </div>
               <div>

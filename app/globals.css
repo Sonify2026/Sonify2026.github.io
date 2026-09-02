@@ -469,17 +469,51 @@ button { color: inherit; }
 /* Research tool roadmap */
 .tool-roadmap { background: var(--paper-light); border-bottom: 1px solid var(--line); border-top: 1px solid var(--line); }
 .tool-roadmap-grid { border-top: 1px solid var(--ink); display: grid; grid-template-columns: repeat(3, 1fr); }
-.tool-roadmap-grid article { display: grid; gap: 22px; grid-template-columns: auto 1fr; min-height: 250px; padding: 34px 30px; }
-.tool-roadmap-grid article + article { border-left: 1px solid var(--line); }
-.tool-roadmap-grid article > span { color: var(--red); font-family: Georgia, serif; font-size: 18px; font-style: italic; }
+.tool-roadmap-grid > a { display: grid; gap: 22px; grid-template-columns: auto 1fr; min-height: 250px; padding: 34px 30px; transition: background .2s, color .2s; }
+.tool-roadmap-grid > a:nth-child(3n + 2), .tool-roadmap-grid > a:nth-child(3n + 3) { border-left: 1px solid var(--line); }
+.tool-roadmap-grid > a:nth-child(n + 4) { border-top: 1px solid var(--line); }
+.tool-roadmap-grid > a:hover { background: var(--brand-navy); color: white; }
+.tool-roadmap-grid > a > span { color: var(--red); font-family: Georgia, serif; font-size: 18px; font-style: italic; }
 .tool-roadmap-grid small { color: var(--red); font-size: 9px; font-weight: 800; letter-spacing: .16em; }
 .tool-roadmap-grid h3 { font-family: Georgia, "Songti SC", serif; font-size: 26px; font-weight: 500; margin: 28px 0 14px; }
 .tool-roadmap-grid p, .tool-roadmap-note { color: var(--muted); font-family: Georgia, "Songti SC", serif; line-height: 1.85; margin: 0; }
+.tool-roadmap-grid > a:hover p { color: #d9dfda; }
+.tool-roadmap-grid strong { color: var(--red); display: inline-block; font-size: 10px; font-weight: 500; margin-top: 25px; }
 .tool-roadmap-note { border-top: 1px solid var(--line); font-size: 13px; padding-top: 22px; }
+
+/* Tools */
+.tools-page { padding-bottom: 130px; padding-top: 95px; }
+.tools-intro { align-items: end; display: grid; gap: 20px 50px; grid-template-columns: 1fr minmax(280px, 430px); }
+.tools-intro .eyebrow { grid-column: 1 / -1; }
+.tools-intro > p:last-child { margin: 0; }
+.tools-privacy-note { align-items: center; background: var(--brand-navy); color: white; display: grid; gap: 28px; grid-template-columns: auto 1fr auto; margin-top: 42px; padding: 24px 28px; }
+.tools-privacy-note > span { color: var(--brand-cyan); font-size: 9px; font-weight: 800; letter-spacing: .15em; }
+.tools-privacy-note p { color: #d9dfda; font-family: Georgia, "Songti SC", serif; font-size: 13px; line-height: 1.7; margin: 0; }
+.tools-privacy-note a { color: white; font-size: 10px; white-space: nowrap; }
+.tools-catalog { border-left: 1px solid var(--line); border-top: 1px solid var(--ink); display: grid; grid-template-columns: repeat(2, 1fr); margin-top: 64px; }
+.tool-catalog-card { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 430px; padding: 34px; transition: background .2s, color .2s, transform .2s; }
+.tool-catalog-card:hover { background: var(--paper-light); transform: translateY(-3px); }
+.tool-catalog-topline, .tool-catalog-footer { align-items: center; display: flex; justify-content: space-between; }
+.tool-catalog-topline > span { color: var(--red); font-family: Georgia, serif; font-size: 18px; font-style: italic; }
+.tool-catalog-topline small { color: var(--muted); font-size: 9px; letter-spacing: .14em; }
+.tool-catalog-card h2 { font-family: Georgia, "Songti SC", serif; font-size: 34px; font-weight: 500; letter-spacing: -.025em; margin: 45px 0 18px; }
+.tool-catalog-card > p { color: var(--muted); font-family: Georgia, "Songti SC", serif; font-size: 15px; line-height: 1.85; margin: 0; }
+.tool-feature-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 28px; }
+.tool-feature-list span { background: var(--brand-blue-soft); color: var(--brand-navy); font-size: 9px; padding: 7px 9px; }
+.tool-catalog-footer { border-top: 1px solid var(--line); margin-top: auto; padding-top: 20px; }
+.tool-catalog-footer small { color: var(--muted); font-size: 9px; }
+.tool-catalog-footer strong { color: var(--red); font-size: 10px; font-weight: 500; }
 @media (max-width: 820px) {
   .tool-roadmap-grid { grid-template-columns: 1fr; }
-  .tool-roadmap-grid article { min-height: 0; }
-  .tool-roadmap-grid article + article { border-left: 0; border-top: 1px solid var(--line); }
+  .tool-roadmap-grid > a { min-height: 0; }
+  .tool-roadmap-grid > a:nth-child(n) { border-left: 0; border-top: 1px solid var(--line); }
+  .tool-roadmap-grid > a:first-child { border-top: 0; }
+  .tools-page { padding-top: 65px; }
+  .tools-intro { display: block; }
+  .tools-intro > p:last-child { margin-top: 28px; }
+  .tools-privacy-note { align-items: start; grid-template-columns: 1fr; }
+  .tools-catalog { grid-template-columns: 1fr; }
+  .tool-catalog-card { min-height: 390px; padding: 28px; }
 }
 /* Obsidian / LaTeX math */
 .prose .katex { color: var(--ink); font-size: 1.06em; }
