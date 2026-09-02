@@ -71,7 +71,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <nav className="post-toc" aria-label="文章目录">
               <span>本页目录</span>
               {post.toc.map((item) => (
-                <a className={item.level === 3 ? "toc-level-3" : ""} key={item.id} href={`#${item.id}`}>{item.text}</a>
+                <a className={`toc-level-${item.level}`} key={item.id} href={`#${item.id}`}>{item.text}</a>
               ))}
             </nav>
           )}

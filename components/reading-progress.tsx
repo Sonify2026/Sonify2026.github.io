@@ -20,5 +20,5 @@ export function ReadingProgress() {
     };
   }, []);
 
-  return <div className="reading-progress" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div>;
+  return <div className="reading-progress" aria-hidden="true"><span style={{ transform: `scaleX(${progress / 100})` }} /></div>;
 }

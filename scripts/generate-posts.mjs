@@ -101,11 +101,62 @@ function estimateReadingTime(markdown) {
   return `${Math.max(1, Math.ceil(chineseCharacters / 400 + otherWords / 200))} 分钟阅读`;
 }
 
+const calloutTones = new Map([
+  ["abstract", "note"], ["summary", "note"], ["tldr", "note"], ["引言", "note"], ["摘要", "note"], ["总结", "note"],
+  ["info", "info"], ["todo", "info"], ["信息", "info"], ["待办", "info"],
+  ["tip", "tip"], ["hint", "tip"], ["important", "tip"], ["success", "tip"], ["check", "tip"], ["done", "tip"], ["提示", "tip"], ["重要", "tip"], ["结论", "tip"],
+  ["warning", "warning"], ["caution", "warning"], ["attention", "warning"], ["question", "warning"], ["help", "warning"], ["faq", "warning"], ["注意", "warning"], ["警告", "warning"], ["问题", "warning"],
+  ["failure", "danger"], ["fail", "danger"], ["missing", "danger"], ["danger", "danger"], ["error", "danger"], ["bug", "danger"], ["失败", "danger"], ["危险", "danger"], ["错误", "danger"],
+  ["example", "example"], ["示例", "example"], ["quote", "quote"], ["cite", "quote"], ["引用", "quote"],
+]);
+
+const calloutDefaultTitles = new Map([
+  ["note", "备注"], ["abstract", "摘要"], ["summary", "摘要"], ["tldr", "摘要"],
+  ["info", "信息"], ["todo", "待办"], ["tip", "提示"], ["hint", "提示"], ["important", "重要"],
+  ["success", "完成"], ["check", "完成"], ["done", "完成"], ["question", "问题"], ["help", "帮助"],
+  ["faq", "常见问题"], ["warning", "警告"], ["caution", "注意"], ["attention", "注意"],
+  ["failure", "失败"], ["fail", "失败"], ["missing", "缺失"], ["danger", "危险"], ["error", "错误"],
+  ["bug", "问题"], ["example", "示例"], ["quote", "引用"], ["cite", "引用"],
+]);
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function decorateObsidianCallouts(html) {
+  return html.replace(/<blockquote>\s*([\s\S]*?)<\/blockquote>/g, (block, innerHtml) => {
+    const marker = innerHtml.match(/^<p>\[!([^\]\r\n]+)\]([+-])?[ \t]*([^\r\n<]*)?(?:\r?\n)?/i);
+    if (!marker) return block;
+
+    const rawType = marker[1].trim();
+    const normalizedType = rawType.toLocaleLowerCase();
+    const tone = calloutTones.get(normalizedType) ?? "note";
+    const customTitle = marker[3]?.trim();
+    const title = customTitle || calloutDefaultTitles.get(normalizedType) || rawType;
+    const content = innerHtml.slice(marker[0].length);
+    const contentHtml = content === "</p>\n" ? "" : `<p>${content}`;
+    const attributes = `class="obsidian-callout obsidian-callout--${tone}" data-callout="${escapeHtml(rawType)}"`;
+    const titleHtml = `<span class="obsidian-callout-title">${escapeHtml(title)}</span>`;
+    const bodyHtml = `<div class="obsidian-callout-content">${contentHtml}</div>`;
+
+    if (marker[2]) {
+      const open = marker[2] === "+" ? " open" : "";
+      return `<details ${attributes}${open}><summary>${titleHtml}</summary>${bodyHtml}</details>`;
+    }
+
+    return `<aside ${attributes} role="note">${titleHtml}${bodyHtml}</aside>`;
+  });
+}
+
 
 function addHeadingAnchors(html) {
   const toc = [];
   const usedIds = new Map();
-  const decoratedHtml = html.replace(/<h([23])>([\s\S]*?)<\/h\1>/g, (_, levelValue, innerHtml) => {
+  const decoratedHtml = html.replace(/<h([1-6])>([\s\S]*?)<\/h\1>/g, (_, levelValue, innerHtml) => {
     const text = innerHtml
       .replace(/<[^>]+>/g, "")
       .replaceAll("&amp;", "&")
@@ -117,7 +168,8 @@ function addHeadingAnchors(html) {
     const count = usedIds.get(baseId) ?? 0;
     usedIds.set(baseId, count + 1);
     const id = count === 0 ? baseId : `${baseId}-${count + 1}`;
-    toc.push({ id, text, level: Number(levelValue) });
+    const level = Number(levelValue);
+    if (level <= 3) toc.push({ id, text, level });
     return `<h${levelValue} id="${id}">${innerHtml}</h${levelValue}>`;
   });
   return { html: decoratedHtml, toc };
@@ -287,7 +339,8 @@ async function generate() {
   const posts = [];
   for (const record of records) {
     const attachmentLookup = await collectArticleAttachments(record);
-    const rawHtml = await marked.parse(prepareObsidianMarkdown(record.body, noteLookup, attachmentLookup));
+    const parsedHtml = await marked.parse(prepareObsidianMarkdown(record.body, noteLookup, attachmentLookup));
+    const rawHtml = decorateObsidianCallouts(parsedHtml);
     const { html, toc } = addHeadingAnchors(rawHtml);
     posts.push({
       slug: record.slug,
