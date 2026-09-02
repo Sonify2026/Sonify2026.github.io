@@ -3,6 +3,68 @@ import type { Post, TagSummary } from "./post-types";
 
 export const posts: Post[] = [
   {
+    "slug": "fiji-15",
+    "title": "Fiji 宏工具分享｜一键批量处理 Zeiss CZI 多通道图像：拆分、伪彩、Z 投影、合并与导出",
+    "description": "Fiji 宏自动化处理蔡司 CZI 原始共聚焦文件，实现批量读取 CZI、通道拆分、Z‑stack 最大强度 MIP 投影、伪彩上色、通道合并、批量导出 TIF，标准化处理 LSM900 等产出的.czi 图像，减少手动重复操作，保证组间处理参数统一、结果可复现。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2026-09-03",
+    "dateLabel": "2026.09.03",
+    "readingTime": "9 分钟阅读",
+    "toc": [
+      {
+        "id": "一这个工具解决什么问题",
+        "text": "一、这个工具解决什么问题？",
+        "level": 2
+      },
+      {
+        "id": "step-1运行宏文件",
+        "text": "Step 1：运行宏文件",
+        "level": 2
+      },
+      {
+        "id": "参数说明",
+        "text": "参数说明",
+        "level": 3
+      },
+      {
+        "id": "step-2设置每一个-channel",
+        "text": "Step 2：设置每一个 Channel",
+        "level": 2
+      },
+      {
+        "id": "step-3等待批处理完成",
+        "text": "Step 3：等待批处理完成",
+        "level": 2
+      },
+      {
+        "id": "1-默认假设同一批-czi-的结构一致",
+        "text": "1. 默认假设同一批 CZI 的结构一致",
+        "level": 2
+      },
+      {
+        "id": "2-建议先用少量代表性数据测试",
+        "text": "2. 建议先用少量代表性数据测试",
+        "level": 2
+      },
+      {
+        "id": "3-enhance-contrast-不等于定量分析",
+        "text": "3. Enhance Contrast 不等于定量分析",
+        "level": 2
+      },
+      {
+        "id": "4-merge-使用的是-rgb-加法叠加",
+        "text": "4. Merge 使用的是 RGB 加法叠加",
+        "level": 2
+      }
+    ],
+    "html": "<blockquote>\n<p>[!引言]\n做显微成像的人，大概率都经历过这样的场景：<br>一批 Zeiss <code>.czi</code> 文件需要逐个打开、拆分通道、改颜色、做 Z-stack 最大强度投影、增强对比度、分别保存单通道图，再导出一张合并图。  </p>\n<p>文件少的时候还能手动完成；一旦样本数上升，这套操作就会迅速变成重复、耗时，而且非常容易出现命名不统一、颜色设置错误、漏存文件等问题。</p>\n<p>为了解决这个问题，我写了一个 Fiji / ImageJ 宏工具：<strong>Batch CZI Multi-Channel Processor</strong>。<br>它面向批量 Zeiss CZI 多通道显微图像处理，可以自动识别通道，并按统一参数完成单通道拆分、伪彩、Z 最大强度投影、对比度增强、RGB 合并及批量导出。</p>\n</blockquote>\n<h2 id=\"一这个工具解决什么问题\">一、这个工具解决什么问题？</h2>\n<p>在荧光显微镜、共聚焦显微镜等实验中，我们经常会获得包含多个通道的 <code>.czi</code> 文件，例如：</p>\n<ul>\n<li>Channel 1：DAPI</li>\n<li>Channel 2：GFP</li>\n<li>Channel 3：mCherry</li>\n<li>Channel 4：远红通道</li>\n<li>……</li>\n</ul>\n<p>常规处理流程通常包括：</p>\n<ol>\n<li>用 Fiji 打开 CZI；</li>\n<li>拆分各个通道；</li>\n<li>为不同通道设置伪彩；</li>\n<li>对 Z-stack 做 Maximum Intensity Projection；</li>\n<li>适当增强显示对比度；</li>\n<li>分别保存各通道图像；</li>\n<li>再生成一张多通道 Merge 图；</li>\n<li>对下一张 CZI 重复以上全部操作。</li>\n</ol>\n<p>问题在于：<strong>这些步骤高度标准化，却又需要大量重复点击。</strong></p>\n<p>如果一次需要处理几十甚至上百个视野，手工操作不仅耗时，也很难保证每一张图的处理规则完全一致。</p>\n<p>因此，这个宏的设计目标非常明确：</p>\n<blockquote>\n<p><strong>把重复性的显微图像预处理流程标准化，并尽可能一次配置、整批执行。</strong></p>\n</blockquote>\n<h1>二、工具简介</h1>\n<p><strong>工具名称：</strong> Batch CZI Multi-Channel Processor<br><strong>版本：</strong> v1.0.0<br><strong>运行平台：</strong> Fiji / ImageJ 1.53d 或更高版本<br><strong>依赖：</strong> Bio-Formats<br><strong>输入格式：</strong> Zeiss <code>.czi</code><br><strong>输出格式：</strong> TIFF 或 PNG  </p>\n<p>如果使用的是标准 Fiji，一般已经自带 Bio-Formats，因此通常不需要额外安装插件。</p>\n<h1>三、主要功能及使用</h1>\n<h2 id=\"step-1运行宏文件\">Step 1：运行宏文件</h2>\n<p>在 Fiji 中选择“<code>Plugins -&gt; Macro -&gt; Run</code>”选择打开下载好的 <code>Batch_CZI_MultiChannel_Processor.ijm</code> 文件（🏷️文件可在文末获取）。</p>\n<p>首先会看到主参数设置窗口。</p>\n<p><img src=\"/article-assets/fiji-15/Fiji-%E5%AE%8F%E5%B7%A5%E5%85%B7%E5%88%86%E4%BA%AB-%E4%B8%80%E9%94%AE%E6%89%B9%E9%87%8F%E5%A4%84%E7%90%86-Zeiss-CZI-%E5%A4%9A%E9%80%9A%E9%81%93%E5%9B%BE%E5%83%8F-%E6%8B%86%E5%88%86%E3%80%81%E4%BC%AA%E5%BD%A9%E3%80%81Z-%E6%8A%95%E5%BD%B1%E3%80%81%E5%90%88%E5%B9%B6%E4%B8%8E%E5%AF%BC%E5%87%BA-001.jpeg\" alt=\"Fiji-宏工具分享-一键批量处理-Zeiss-CZI-多通道图像-拆分、伪彩、Z-投影、合并与导出-001.jpeg\"></p>\n<p>需要设置：</p>\n<table>\n<thead>\n<tr>\n<th>参数</th>\n<th>作用</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>Input CZI folder</td>\n<td>CZI 原始文件所在目录</td>\n</tr>\n<tr>\n<td>Output folder</td>\n<td>输出目录</td>\n</tr>\n<tr>\n<td>Max Intensity Projection (Z)</td>\n<td>是否进行 Z 最大强度投影</td>\n</tr>\n<tr>\n<td>Auto enhance contrast</td>\n<td>是否自动增强对比度</td>\n</tr>\n<tr>\n<td>Saturated pixels (%)</td>\n<td>Enhance Contrast 的 saturated 参数</td>\n</tr>\n<tr>\n<td>Convert individual LUT images to RGB</td>\n<td>单通道保存前是否转换为 RGB</td>\n</tr>\n<tr>\n<td>Create merged RGB image</td>\n<td>是否生成 Merge 图</td>\n</tr>\n<tr>\n<td>Skip outputs that already exist</td>\n<td>是否跳过已经完整输出的文件</td>\n</tr>\n<tr>\n<td>Export format</td>\n<td>TIFF 或 PNG</td>\n</tr>\n</tbody></table>\n<h3 id=\"参数说明\">参数说明</h3>\n<h4>Max Intensity Projection (Z)</h4>\n<p>如果 CZI 文件包含 Z-stack，可以在主界面中勾选：<code>Max Intensity Projection (Z)</code></p>\n<p>宏会对每个需要处理的通道执行：</p>\n<pre><code class=\"language-text\">Z Project → Max Intensity\n</code></pre>\n<p>也就是常用的 <strong>Maximum Intensity Projection，最大强度投影</strong>。</p>\n<p>其逻辑是：</p>\n<blockquote>\n<p>对 Z 轴不同层面中相同 XY 位置的像素进行比较，并保留其中最大强度值。</p>\n</blockquote>\n<p>这非常适合用于：</p>\n<ul>\n<li>共聚焦 Z-stack 快速展示；</li>\n<li>细胞荧光信号整体观察；</li>\n<li>神经突起、血管等空间结构展示；</li>\n<li>组织切片多层信号压缩；</li>\n<li>多层荧光图像的快速预览。</li>\n</ul>\n<p>程序也做了一个判断：</p>\n<pre><code class=\"language-text\">只有 nSlices &gt; 1 时才执行 Z Projection\n</code></pre>\n<p>如果本身就是单层图像，则不会进行无意义的投影操作。</p>\n<h4>Auto enhance contrast</h4>\n<p>程序提供 <code>Auto enhance contrast</code> 选项。勾选以后，可以进一步指定 <code>Saturated pixels (%)</code>，默认值为：<code>0.35%</code> ，对应 Fiji 中：</p>\n<pre><code class=\"language-text\">Enhance Contrast\n</code></pre>\n<p>命令的 <code>saturated</code> 参数。</p>\n<p>例如：</p>\n<pre><code class=\"language-text\">saturated=0.35\n</code></pre>\n<p>宏会在 Z 投影之后、应用 LUT 之前进行对比度增强。</p>\n<p>因此典型流程为：</p>\n<pre><code class=\"language-text\">原始 Channel\n      ↓\nMaximum Intensity Projection\n      ↓\nEnhance Contrast\n      ↓\n应用 LUT\n      ↓\n导出图像\n</code></pre>\n<p>需要特别说明的是，<strong>自动增强对比度更适合用于图像展示或快速浏览</strong>。</p>\n<p>如果后续需要进行严格的荧光强度定量，建议根据自己的实验设计谨慎使用，并保留未经显示增强处理的原始数据。</p>\n<h4>Convert individual LUT images to RGB</h4>\n<p>LUT 在 ImageJ 中本质上可以只是显示映射，并不一定真正写入图像的 RGB 像素。因此程序提供了\n<code>Convert individual LUT images to RGB</code>，默认开启。</p>\n<p>开启后，在保存单通道图像之前会执行：</p>\n<pre><code class=\"language-text\">RGB Color\n</code></pre>\n<p>这样导出的 TIFF 或 PNG 打开以后，可以直接看到设置好的：</p>\n<ul>\n<li>蓝色 DAPI；</li>\n<li>绿色 GFP；</li>\n<li>红色 mCherry；</li>\n<li>其他自定义 LUT。</li>\n</ul>\n<p>如果希望保留原始灰度数据与 LUT 的显示逻辑，也可以取消这一选项。</p>\n<h4>Create merged RGB image</h4>\n<p>除了分别导出每一个 Channel，这个宏还可以自动生成 <code>Create merged RGB image</code>，默认同样为开启状态。</p>\n<p>这里并不是简单调用 ImageJ 固定的 RGB 三通道合并方式。</p>\n<p>程序采用的逻辑是：</p>\n<ol>\n<li>对每一个已选择 Channel 复制一份图像；</li>\n<li>应用对应 LUT；</li>\n<li>转换成 RGB；</li>\n<li>将不同 Channel 的 RGB 图像进行加法叠加；</li>\n<li>得到最终 Merge。</li>\n</ol>\n<p>因此，即便实验中使用了：</p>\n<ul>\n<li>Cyan</li>\n<li>Magenta</li>\n<li>Yellow</li>\n<li>Fire</li>\n<li>Ice</li>\n<li>Spectrum</li>\n</ul>\n<p>等 LUT，也可以保留其颜色效果参与最终合并。</p>\n<p>这使 Merge 功能不仅局限于传统的：</p>\n<pre><code class=\"language-text\">Red + Green + Blue\n</code></pre>\n<p>三个通道。</p>\n<p>对于 4 色、5 色甚至更多通道的展示会更加灵活。</p>\n<h4>Export format</h4>\n<p>在运行宏时，可以选择 <code>Export format</code></p>\n<p>目前支持：</p>\n<pre><code class=\"language-text\">Tiff\nPNG\n</code></pre>\n<p>设置好所有参数后，点击 <code>OK</code> 进行下一步。</p>\n<h2 id=\"step-2设置每一个-channel\">Step 2：设置每一个 Channel</h2>\n<p>确认主参数后，程序会首先在输入文件夹中寻找第一张 <code>.czi</code> 文件，并检测 Channel 数量。</p>\n<p>随后弹出 Channel 配置窗口，程序允许为每个 Channel 设置独立名称。</p>\n<p><img src=\"/article-assets/fiji-15/Fiji-%E5%AE%8F%E5%B7%A5%E5%85%B7%E5%88%86%E4%BA%AB-%E4%B8%80%E9%94%AE%E6%89%B9%E9%87%8F%E5%A4%84%E7%90%86-Zeiss-CZI-%E5%A4%9A%E9%80%9A%E9%81%93%E5%9B%BE%E5%83%8F-%E6%8B%86%E5%88%86%E3%80%81%E4%BC%AA%E5%BD%A9%E3%80%81Z-%E6%8A%95%E5%BD%B1%E3%80%81%E5%90%88%E5%B9%B6%E4%B8%8E%E5%AF%BC%E5%87%BA-001%201.jpeg\" alt=\"Fiji-宏工具分享-一键批量处理-Zeiss-CZI-多通道图像-拆分、伪彩、Z-投影、合并与导出-001 1.jpeg\"></p>\n<p>例如：</p>\n<table>\n<thead>\n<tr>\n<th>原始通道</th>\n<th>自定义名称</th>\n</tr>\n</thead>\n<tbody><tr>\n<td>C1</td>\n<td>DAPI</td>\n</tr>\n<tr>\n<td>C2</td>\n<td>GFP</td>\n</tr>\n<tr>\n<td>C3</td>\n<td>mCherry</td>\n</tr>\n<tr>\n<td>C4</td>\n<td>Cy5</td>\n</tr>\n</tbody></table>\n<p>这些名称不仅用于帮助识别，也会自动写入最终的文件夹和文件名中。</p>\n<p>例如：</p>\n<pre><code class=\"language-text\">C1_DAPI_blue/\nC2_GFP_green/\nC3_mCherry_red/\n</code></pre>\n<p>最终输出文件也可以类似：</p>\n<pre><code class=\"language-text\">Sample01_DAPI_blue.tif\nSample01_GFP_green.tif\nSample01_mCherry_red.tif\n</code></pre>\n<p>这样整理后的实验数据会比简单的 <code>C1</code>、<code>C2</code>、<code>C3</code> 更容易阅读和归档。</p>\n<p>例如检测到 3 个 Channel，可以设置：</p>\n<pre><code class=\"language-text\">Channel 1 name = DAPI\nChannel 1 LUT  = Blue\n\nChannel 2 name = GFP\nChannel 2 LUT  = Green\n\nChannel 3 name = mCherry\nChannel 3 LUT  = Red\n</code></pre>\n<h4>每个通道独立设置 LUT 伪彩</h4>\n<p>每个 Channel 都可以单独选择伪彩 LUT。</p>\n<p>目前宏中提供：</p>\n<ul>\n<li>Skip</li>\n<li>Red</li>\n<li>Green</li>\n<li>Blue</li>\n<li>Grays</li>\n<li>Cyan</li>\n<li>Magenta</li>\n<li>Yellow</li>\n<li>Fire</li>\n<li>Ice</li>\n<li>Spectrum</li>\n</ul>\n<p><img src=\"/article-assets/fiji-15/Fiji-%E5%AE%8F%E5%B7%A5%E5%85%B7%E5%88%86%E4%BA%AB-%E4%B8%80%E9%94%AE%E6%89%B9%E9%87%8F%E5%A4%84%E7%90%86-Zeiss-CZI-%E5%A4%9A%E9%80%9A%E9%81%93%E5%9B%BE%E5%83%8F-%E6%8B%86%E5%88%86%E3%80%81%E4%BC%AA%E5%BD%A9%E3%80%81Z-%E6%8A%95%E5%BD%B1%E3%80%81%E5%90%88%E5%B9%B6%E4%B8%8E%E5%AF%BC%E5%87%BA-001%202.jpeg\" alt=\"Fiji-宏工具分享-一键批量处理-Zeiss-CZI-多通道图像-拆分、伪彩、Z-投影、合并与导出-001 2.jpeg\"></p>\n<p>例如可以设置：</p>\n<pre><code class=\"language-text\">DAPI     → Blue\nGFP      → Green\nmCherry  → Red\nCy5      → Magenta\n</code></pre>\n<p>宏默认对前几个通道给出了较常见的颜色：</p>\n<pre><code class=\"language-text\">C1 → Blue\nC2 → Green\nC3 → Red\nC4 → Magenta\nC5 → Cyan\nC6 → Yellow\n</code></pre>\n<p>第 7 个及之后的通道默认使用 Grays。当然，所有颜色都可以在运行时重新选择。</p>\n<p>此外，并不是每个实验都需要导出 CZI 中的全部通道。如果某个通道只用于辅助观察，或者当前分析不需要，可以直接把该通道的 LUT 设置成 <code>Skip</code> 即可。</p>\n<p>之后程序会跳过这一通道：</p>\n<ul>\n<li>不进行图像处理；</li>\n<li>不导出单通道文件；</li>\n<li>不加入 Merge 图。</li>\n</ul>\n<p>因此，无需为了不同实验条件重新修改宏代码。</p>\n<h2 id=\"step-3等待批处理完成\">Step 3：等待批处理完成</h2>\n<p>之后程序会自动完成整批 CZI 的处理。在处理期间，Fiji 状态栏会显示当前文件名和进度。</p>\n<p>为了提高效率，宏使用：</p>\n<pre><code class=\"language-text\">setBatchMode(true)\n</code></pre>\n<p>进行批处理，因此不会把每一步中间图像都持续显示在桌面上。处理完成后，会显示：</p>\n<pre><code class=\"language-text\">Total CZI files\nSuccessful\nSkipped\nFailed\nLog\n</code></pre>\n<p>方便快速检查结果。</p>\n<h4>自动创建结构化输出文件夹</h4>\n<p>程序不会把所有导出图片全部堆在同一个目录中，而是根据 Channel 自动创建独立文件夹。</p>\n<p>例如，一个三通道实验设置为：</p>\n<pre><code class=\"language-text\">C1 = DAPI     / Blue\nC2 = GFP      / Green\nC3 = mCherry  / Red\n</code></pre>\n<p>输出文件夹可能为：</p>\n<pre><code class=\"language-text\">Output/\n│\n├── C1_DAPI_blue/\n│   ├── Sample01_DAPI_blue.tif\n│   ├── Sample02_DAPI_blue.tif\n│   └── Sample03_DAPI_blue.tif\n│\n├── C2_GFP_green/\n│   ├── Sample01_GFP_green.tif\n│   ├── Sample02_GFP_green.tif\n│   └── Sample03_GFP_green.tif\n│\n├── C3_mCherry_red/\n│   ├── Sample01_mCherry_red.tif\n│   ├── Sample02_mCherry_red.tif\n│   └── Sample03_mCherry_red.tif\n│\n├── Merge/\n│   ├── Sample01_Merge.tif\n│   ├── Sample02_Merge.tif\n│   └── Sample03_Merge.tif\n│\n└── batch_log.txt\n</code></pre>\n<p>这种目录结构非常适合后续：</p>\n<ul>\n<li>按 Channel 统计；</li>\n<li>批量导入其他分析软件；</li>\n<li>整理实验数据；</li>\n<li>自动化拼图；</li>\n<li>后续 Python / R 图像分析。</li>\n</ul>\n<h1>四、完整处理流程</h1>\n<p>如果开启所有主要功能，一张 CZI 的实际流程可以概括为：</p>\n<pre><code class=\"language-text\">读取 CZI\n   ↓\nBio-Formats Import\n   ↓\n读取 C / Z / T 信息\n   ↓\nSplit Channels\n   ↓\n逐个处理选中的 Channel\n   ↓\nZ Maximum Intensity Projection（可选）\n   ↓\nEnhance Contrast（可选）\n   ↓\n应用指定 LUT\n   ↓\n生成 RGB Merge 素材\n   ↓\n单 Channel RGB 转换（可选）\n   ↓\n保存 TIFF / PNG\n   ↓\n所有 Channel RGB 加法合并\n   ↓\n保存 Merge\n   ↓\n写入 batch_log.txt\n</code></pre>\n<p>整个过程基本不需要人工逐图干预。</p>\n<h1>五、使用前需要注意的几个问题</h1>\n<h2 id=\"1-默认假设同一批-czi-的结构一致\">1. 默认假设同一批 CZI 的结构一致</h2>\n<p>宏会使用输入目录中的 <strong>第一张 CZI</strong> 来确定 Channel 数量，并据此生成整批数据的 Channel 配置。</p>\n<p>因此比较理想的情况是：</p>\n<blockquote>\n<p>同一个输入文件夹中的 CZI 具有一致的 C / Z / T 结构。</p>\n</blockquote>\n<p>如果后面的某个文件 Channel 数量不同，宏会在日志中记录：</p>\n<pre><code class=\"language-text\">WARN\n</code></pre>\n<p>因此，不建议把完全不同实验设置的 CZI 混在同一个文件夹中运行。</p>\n<p>更推荐按照：</p>\n<pre><code class=\"language-text\">相同显微镜设置\n相同 Channel 数\n相同实验批次\n</code></pre>\n<p>分别建立输入目录。</p>\n<h2 id=\"2-建议先用少量代表性数据测试\">2. 建议先用少量代表性数据测试</h2>\n<p>虽然程序支持直接批量运行，但正式处理大量数据之前，建议先复制：</p>\n<pre><code class=\"language-text\">2～3 个代表性 CZI\n</code></pre>\n<p>测试：</p>\n<ul>\n<li>Channel 顺序；</li>\n<li>LUT；</li>\n<li>Z Projection；</li>\n<li>对比度；</li>\n<li>输出文件名；</li>\n<li>Merge 效果。</li>\n</ul>\n<p>确认无误后，再运行完整批次。</p>\n<p>这也是任何显微图像自动化流程都值得坚持的习惯。</p>\n<h2 id=\"3-enhance-contrast-不等于定量分析\">3. Enhance Contrast 不等于定量分析</h2>\n<p>自动增强对比度的目的主要是改善显示效果。</p>\n<p>如果实验需要比较不同样本之间的：</p>\n<ul>\n<li>Mean intensity；</li>\n<li>Integrated density；</li>\n<li>Fluorescence intensity；</li>\n<li>Signal/background ratio；</li>\n</ul>\n<p>则不应简单以自动增强后的 RGB 图像作为定量依据。</p>\n<p>更规范的做法仍然是：</p>\n<blockquote>\n<p><strong>保留原始 CZI，并基于原始或经过明确标准化处理的数据进行定量。</strong></p>\n</blockquote>\n<p>这个宏更偏向于：</p>\n<pre><code class=\"language-text\">标准化批处理\n+\n图像导出\n+\n可视化准备\n</code></pre>\n<p>而不是替代完整的定量分析流程。</p>\n<h2 id=\"4-merge-使用的是-rgb-加法叠加\">4. Merge 使用的是 RGB 加法叠加</h2>\n<p>这个宏为了保留任意 LUT 的颜色，将每个选中 Channel 先转换为 RGB，再进行加法合并。</p>\n<p>它的优势是颜色自由度高。但也意味着：</p>\n<blockquote>\n<p>Merge 图主要定位于可视化结果，而不是用于恢复原始多通道定量信息。</p>\n</blockquote>\n<p>因此原始 CZI 文件一定要保留。</p>\n<blockquote>\n<p>✨ 工具获取：后台私信发送关键词“<strong>Fiji001</strong>”，就可免费获取这款 Fiji 宏工具啦！</p>\n</blockquote>\n"
+  },
+  {
     "slug": "fiji-14",
     "title": "Fiji细胞定量分析：不只会数细胞，还能测面积、形态和荧光强度",
     "description": "Fiji 不要只会简单数细胞！一键批量获取细胞面积、形态、荧光强度，免疫荧光定量不再只靠肉眼看图。",
@@ -2018,11 +2080,11 @@ export const categories = ["全部","科研绘图与分析","细胞生物学","�
 export const tags: TagSummary[] = [
   {
     "name": "科研绘图",
-    "count": 37
+    "count": 38
   },
   {
     "name": "数据分析",
-    "count": 33
+    "count": 34
   },
   {
     "name": "流式细胞术",
@@ -2030,7 +2092,7 @@ export const tags: TagSummary[] = [
   },
   {
     "name": "Fiji",
-    "count": 14
+    "count": 15
   },
   {
     "name": "FlowJo",
