@@ -3,6 +3,53 @@ import type { Post, TagSummary } from "./post-types";
 
 export const posts: Post[] = [
   {
+    "slug": "fiji-16",
+    "title": "Fiji + StarDist：AI自动分割细胞核的完整工作流",
+    "description": "本篇介绍如何在 Fiji 中使用 StarDist 进行 AI 细胞核分割，包括荧光细胞核和 H&E/DAB 明场图像的识别、Probability Threshold 等关键参数设置，以及如何将分割结果转换为 ROI 和 Binary Mask，为后续细胞计数、形态学分析和染色强度定量提供基础。",
+    "category": "科研绘图与分析",
+    "tags": [
+      "数据分析",
+      "科研绘图",
+      "Fiji"
+    ],
+    "date": "2026-09-03",
+    "dateLabel": "2026.09.03",
+    "readingTime": "11 分钟阅读",
+    "toc": [
+      {
+        "id": "荧光细胞核分割",
+        "text": "荧光细胞核分割",
+        "level": 2
+      },
+      {
+        "id": "从-stardist-分割结果生成二值-mask",
+        "text": "从 StarDist 分割结果生成二值 Mask",
+        "level": 2
+      },
+      {
+        "id": "方法一通过-roi-manager-生成-mask",
+        "text": "方法一：通过 ROI Manager 生成 Mask",
+        "level": 3
+      },
+      {
+        "id": "方法二通过-label-image-生成二值-mask",
+        "text": "方法二：通过 Label Image 生成二值 Mask",
+        "level": 3
+      },
+      {
+        "id": "明场图像中的细胞核分割",
+        "text": "明场图像中的细胞核分割",
+        "level": 2
+      },
+      {
+        "id": "操作步骤",
+        "text": "操作步骤",
+        "level": 3
+      }
+    ],
+    "html": "<p>近年来，<strong>人工智能（AI）和深度学习</strong>在显微图像分析中的应用越来越普遍，相关工具的使用门槛也在不断降低。传统的图像分析方法通常依赖阈值分割、二值化和 Watershed 等操作，而 AI 方法则可以通过预先训练好的模型，直接学习目标的形态特征，从而完成更加智能的目标识别与分割。</p>\n<p>目前，大多数 AI 图像分析流程主要基于 <strong>Python</strong> 开发。对于没有编程基础的科研人员来说，这类工具往往需要配置运行环境、安装依赖库，甚至编写代码，因此不一定具备直观的图形界面，也不像 Fiji 中的传统分析功能那样能够通过简单的菜单操作完成。</p>\n<p>不过，一些成熟的 AI 图像分析工具已经被整合到 Fiji 中，并以插件的形式提供。这样，即使不熟悉 Python，也可以直接在 Fiji 的图形界面中调用深度学习模型进行图像分析。<strong>StarDist</strong> 就是其中非常典型的一款插件。</p>\n<p>StarDist 主要用于识别和分割<strong>细胞核以及其他近似圆形或星凸形的目标</strong>。它能够对荧光显微图像和部分明场/组织学图像中的细胞核进行快速、准确的实例分割，并且可以直接区分彼此接触甚至存在一定程度重叠的细胞核。</p>\n<p>与传统的 Threshold + Watershed 流程相比，StarDist 的一个重要优势是：它并不仅仅根据像素灰度判断目标，而是结合模型学习到的<strong>细胞核形态特征</strong>进行识别，因此在背景不均匀、核间相互接触或细胞密度较高的情况下，通常能够获得更加稳定的分割结果。</p>\n<p>在继续下面的操作之前，需要确保 Fiji 中已经安装 <strong>StarDist</strong> 和 <strong>CSBDeep</strong>，这两个插件通常可以通过 Fiji 的 <strong>Update Sites</strong> 进行安装。安装完成并重新启动 Fiji 后，就可以在软件菜单中调用 StarDist。</p>\n<h2 id=\"荧光细胞核分割\">荧光细胞核分割</h2>\n<p>① 打开需要分析的图像，本例中使用的示例图像如下所示：</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001.jpeg\"></p>\n<p>② 选择 <code>Plugins &gt; StarDist &gt; StarDist 2D</code>。</p>\n<p>③ <strong>StarDist 2D</strong> 的配置窗口中包含多种可调参数，可用于优化分割效果，或调用自己训练的模型。</p>\n<p>为了便于入门，初始阶段只需要重点设置以下几个参数：</p>\n<ul>\n<li><strong>Model</strong>：选择 <strong>Versatile (fluorescent nuclei)</strong></li>\n<li><strong>Probability / Score Threshold</strong>：设置为 <strong>0.70</strong></li>\n<li><strong>Overlap Threshold</strong>：设置为 <strong>0.00</strong></li>\n<li><strong>Output Type</strong>：选择 <strong>Both</strong></li>\n</ul>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%202.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 2.jpeg\"></p>\n<aside class=\"obsidian-callout obsidian-callout--note\" data-callout=\"note\" role=\"note\"><span class=\"obsidian-callout-title\">备注</span><div class=\"obsidian-callout-content\"><p></p>\n<h4 id=\"这几个参数该如何理解\">🏷️这几个参数该如何理解？</h4>\n<p><mark style=\"background:#fff88f\">Model：</mark></p>\n<p>这里选择的 <code>Versatile (fluorescent nuclei)</code> 是 StarDist 自带的通用荧光细胞核模型，适用于大多数常见的核染色图像，例如 DAPI、Hoechst 等。</p>\n<p><mark style=\"background:#fff88f\">Probability / Score Threshold：</mark></p>\n<p>这个参数可以理解为<strong>StarDist 只有在“足够确信”某个区域是细胞核时，才会把它保留下来。</strong></p>\n<ul>\n<li>阈值<strong>高</strong>：结果更严格，假阳性更少，但容易漏检较弱或边界不清的细胞核；</li>\n<li>阈值<strong>低</strong>：能识别更多目标，但也更容易把背景误识别为细胞核。</li>\n</ul>\n<p>因此，这个参数本质上是在<strong>漏检</strong>与<strong>误检</strong>之间做平衡。</p>\n<p>本教程中使用的 <strong>0.70</strong> 是一个比较稳妥的起始值。实际分析时，建议结合原图和分割结果一起查看，而不是只看数字设定。</p>\n<p><mark style=\"background:#fff88f\">Overlap Threshold：</mark></p>\n<p>该参数用于控制候选目标之间允许存在多大程度的重叠。在细胞核分割中，我们通常希望<strong>一个核对应一个独立实例</strong>，因此一般设为 <strong>0.00</strong> 更合理。这样可以最大程度避免两个预测轮廓对同一区域重复覆盖。</p>\n<p>如果把这个值调高，模型可能会保留更多彼此重叠的目标轮廓，看起来似乎“检测更充分”，但实际上可能导致：</p>\n<ul>\n<li>同一区域被多个 ROI 覆盖；</li>\n<li>后续统计中同一个细胞核被重复测量；</li>\n<li>数量和强度分析出现偏差。</li>\n</ul>\n<p>所以对大多数核分割任务来说，<strong>Overlap Threshold 保持 0 往往是最安全的选择</strong>。</p>\n<p><mark style=\"background:#fff88f\">Output Type：</mark></p>\n<p>选择 <strong>Both</strong> 表示同时输出两类结果：</p>\n<ul>\n<li><strong>ROI</strong>：方便后续计数、测量和导出对象信息；</li>\n<li><strong>Mask</strong>：方便直观检查整体分割质量。</li>\n</ul>\n</div></aside>\n<p>④ 点击 <strong>OK</strong> 运行后，我们会得到两类结果：</p>\n<ul>\n<li>一组检测到的目标会被加入 <strong>ROI Manager</strong></li>\n<li>同时生成一张<strong>彩色分割掩膜图</strong></li>\n</ul>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%204.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 4.jpeg\"></p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%203.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 3.jpeg\"></p>\n<p>这说明 StarDist 已经完成了对图像中细胞核的实例分割，并将每个细胞核作为独立对象进行了标记。</p>\n<p>如果发现有些细胞核没有被识别出来，可以适当<strong>降低 Probability Threshold</strong>。不过需要注意，阈值降低虽然会提高检出率，但也可能带来更多<strong>假阳性</strong>，即把部分背景噪声或非目标信号错误识别为细胞核。</p>\n<p>通常情况下，<strong>Overlap Threshold</strong> 一般没有必要设置高于 <strong>0</strong>。例如，当该值提高到 <strong>0.3</strong> 时，某些目标轮廓可能出现彼此重叠，这会在后续测量中造成<strong>重复计数</strong>的问题。</p>\n<h2 id=\"从-stardist-分割结果生成二值-mask\">从 StarDist 分割结果生成二值 Mask</h2>\n<p>StarDist 完成细胞核分割后，如果希望继续使用 Fiji 的传统二值图像分析工具，可以进一步将分割结果转换成 <strong>Binary Mask（二值掩膜）</strong>。</p>\n<p>通常有两种方式可以生成二值 Mask。对于手动分析来说，两种方法都可以正常使用；但如果后续准备通过 <strong>Macro 或脚本实现自动化分析</strong>，利用 <strong>ROI Manager</strong> 来生成 Mask 通常更加方便，也更容易写入批处理流程。</p>\n<h3 id=\"方法一通过-roi-manager-生成-mask\">方法一：通过 ROI Manager 生成 Mask</h3>\n<p>① 首先创建一张与原始图像尺寸完全相同的空白图像。选择 <code>File &gt; New &gt; Image...</code></p>\n<p>本例原始图像尺寸为 <strong>696 × 512 pixels</strong>，因此新建图像也设置为相同尺寸。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%205.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 5.jpeg\"></p>\n<p>② 在新建图像窗口中完成相关设置。<strong>Name</strong>：可自行命名；<strong>Type</strong>选择 <strong>8-bit</strong>； <strong>Fill with</strong> 选择 <strong>Black</strong>。点击 <strong>OK</strong> 后，会得到一张纯黑色的 8-bit 图像。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%206.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 6.jpeg\"></p>\n<p>③ 确认 Fiji 当前的<strong>前景色为白色</strong>。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%207.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 7.jpeg\"></p>\n<p>这是因为接下来要把 StarDist 识别出的 ROI 填充到黑色背景上。如果前景色为白色，最终得到的就是标准形式的二值 Mask：</p>\n<p>④ 激活 <strong>ROI Manager</strong> 窗口，确保其中保留了 StarDist 识别出的所有细胞核 ROI，然后选择 <code>More &gt;&gt; &gt; Fill</code></p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%208.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 8.jpeg\"></p>\n<p>Fiji 会将 ROI Manager 中的所有目标区域填充到当前的空白图像中。此时就得到了一张由 StarDist 分割结果生成的<strong>二值细胞核 Mask</strong>。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%209.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 9.jpeg\"></p>\n<p>⑤ 检查生成的二值图像。</p>\n<p>部分细胞核在生成 Mask 后可能会出现彼此接触或连接的情况。对于这类相邻目标，可以继续使用前面推文中介绍过的 <code>Process &gt; Binary &gt; Watershed</code> 尝试将连接在一起的目标重新分开。</p>\n<aside class=\"obsidian-callout obsidian-callout--note\" data-callout=\"note\" role=\"note\"><span class=\"obsidian-callout-title\">备注</span><div class=\"obsidian-callout-content\"><p></p>\n<h4 id=\"为什么还要把-stardist-roi-转成二值-mask\">🏷️为什么还要把 StarDist ROI 转成二值 Mask？</h4>\n<p>StarDist 本身已经完成了实例分割，所以如果只是进行细胞核计数或逐个 ROI 测量，其实完全可以直接使用 <strong>ROI Manager</strong> 中的结果，并不一定必须再生成二值图像。但二值 Mask 仍然非常有用，因为 Fiji 中很多经典的图像分析操作都建立在二值图像基础上，例如：<strong>Watershed、Morphological Operations、Analyze Particles、Mask 运算以及后续的图像逻辑操作。</strong> 因此，将 StarDist 的 AI 分割结果转换成 Binary Mask，相当于把：<strong>AI 分割流程</strong>与<strong>Fiji 传统图像分析流程</strong>连接了起来。这在实际科研中非常实用。例如可以先利用 StarDist 更准确地识别细胞核，再使用 Fiji 已有的工具完成面积筛选、形态学处理、ROI 运算以及后续定量分析。</p>\n</div></aside>\n<h3 id=\"方法二通过-label-image-生成二值-mask\">方法二：通过 Label Image 生成二值 Mask</h3>\n<p>除了利用 ROI Manager 生成二值 Mask 之外，也可以直接从 StarDist 输出的 <strong>Label Image（标签图像）</strong> 进行转换。</p>\n<p>Label Image 中，不同的细胞核通常会被赋予不同的整数标签值，而背景一般为 0。通过阈值处理，可以很方便地把所有被标记的细胞核区域统一转换为白色，从而得到标准的二值图像。</p>\n<p>① 选中 StarDist 生成的 <strong>Label Image</strong>，然后选择 <code>Image &gt; Adjust &gt; Threshold...</code></p>\n<p>② 将阈值范围设置为：<strong>1 – 最大值（1 to max）</strong></p>\n<p>也就是说像素值为 <strong>0</strong> 的背景不被选中；所有标签值 <strong>≥ 1</strong> 的细胞核区域都被纳入阈值范围。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2010.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 10.jpeg\"></p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2011.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 11.jpeg\"></p>\n<p>③ 点击 <strong>Apply</strong> 应用阈值。这样，原本带有不同标签编号的 Label Image 就会被转换成一张普通的二值图像：背景为黑色；所有细胞核区域为白色。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2012.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 12.jpeg\"></p>\n<p>④ 检查生成的二值 Mask。某些相邻细胞核在转换成二值图像后可能彼此接触，从而重新形成一个连续区域。如果后续需要使用 <strong>Analyze Particles</strong> 这类基于连通区域的分析方法，就可能把两个接触的细胞核误认为一个对象。</p>\n<p>此时可以继续使用前面介绍过的 <code>Process &gt; Binary &gt; Watershed</code> 尝试将相互接触的目标重新分开。</p>\n<aside class=\"obsidian-callout obsidian-callout--note\" data-callout=\"note\" role=\"note\"><span class=\"obsidian-callout-title\">备注</span><div class=\"obsidian-callout-content\"><p></p>\n<h4 id=\"roi-方法和-label-image-方法如何选择\">🏷️ROI 方法和 Label Image 方法如何选择？</h4>\n<p>如果只是进行简单的手动分析，这两种方法都可以。</p>\n<ul>\n<li><strong>使用 ROI Manager：</strong> 更适合后续逐个对象测量，也更方便写入 Fiji Macro 或自动化分析流程。</li>\n<li><strong>使用 Label Image：</strong> 操作更加直接，适合快速把 StarDist 的分割结果转换成普通二值 Mask。</li>\n</ul>\n<p>需要特别注意的是，如果你希望保留 StarDist 已经分好的<strong>单个细胞核实例信息</strong>，那么最好直接使用 ROI 或原始 Label Image，而不要过早地把它转换成普通二值图像。</p>\n<p>因为从 <strong>Label Image → Binary Mask</strong> 这一步，本质上会丢失“哪个像素属于哪个细胞核”的身份信息，只保留“这个像素是不是细胞核”。所以在后续进行单细胞定量时，如果没有特别需要，直接利用 StarDist 输出的 ROI 或 Label Image 往往比重新二值化更加稳妥。</p>\n</div></aside>\n<h2 id=\"明场图像中的细胞核分割\">明场图像中的细胞核分割</h2>\n<p>除了荧光细胞核图像之外，StarDist 也可以用于部分<strong>明场组织学图像</strong>中的细胞核分割。</p>\n<p>对于常见的 <strong>H&amp;E（苏木精-伊红）染色</strong>图像，StarDist 提供了专门的预训练模型。该模型对于许多组织切片中的细胞核具有较好的识别能力，不需要重新训练模型即可直接使用。</p>\n<h3 id=\"操作步骤\">操作步骤</h3>\n<p>① 打开需要分析的图像。本例中使用的图像如下所示：</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2013.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 13.jpeg\"></p>\n<p>② 选择 <code>Plugins &gt; StarDist &gt; StarDist 2D</code>，在 StarDist 2D 参数窗口中，将 <strong>Model</strong> 设置为<strong>Versatile (H&amp;E Nuclei)</strong></p>\n<p>其他参数暂时保持与前面荧光细胞核分析相同，然后点击 <strong>OK</strong> 运行。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2014.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 14.jpeg\"></p>\n<p>③ 如果仍然使用前面设置的：<strong>Probability / Score Threshold = 0.70</strong></p>\n<p>可以发现这个阈值对于当前明场图像来说略显严格，一些真实的细胞核可能无法被识别，从而出现<strong>漏检</strong>。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2015.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 15.jpeg\"></p>\n<p>④ 将 <strong>Probability / Score Threshold</strong> 降低至：<strong>0.30</strong></p>\n<p>再次运行 StarDist，可以获得更完整的细胞核检测结果，使分割结果与实际图像中的细胞核更加吻合。</p>\n<p><img src=\"/article-assets/fiji-16/%E7%BB%86%E8%83%9E%E6%A0%B8%E5%8F%8A%E5%85%B6%E4%BB%96%E8%BF%91%E5%9C%86%E5%BD%A2%E7%9B%AE%E6%A0%87%E8%AE%A1%E6%95%B0%E2%80%94%E2%80%94AI-%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-001%2016.jpeg\" alt=\"细胞核及其他近圆形目标计数——AI-分析方法-001 16.jpeg\"></p>\n<p>⑤ 完成细胞核分割后，可以采用与前面荧光图像相同的方法生成 Binary Mask。例如可以：</p>\n<ul>\n<li>利用 <strong>ROI Manager</strong> 将所有细胞核 ROI 填充到新的黑色图像中；</li>\n<li>或者直接对 StarDist 输出的 <strong>Label Image</strong> 进行阈值处理，将所有细胞核转换成二值 Mask。</li>\n</ul>\n<p>之后即可继续进行 <strong>Analyze Particles、面积统计、形态分析</strong>等操作。</p>\n<p>以上就是本期的所有内容啦！欢迎继续关注，下一篇我们可以继续为大家分享 Fiji 的实用教程。</p>\n<blockquote>\n<p>本文部分内容参考了 Nowell 撰写的 <em>Fiji Training Manual (v6.5)</em>（Monash University, 2023），并据此整理说明。</p>\n</blockquote>\n"
+  },
+  {
     "slug": "fiji-15",
     "title": "Fiji 宏工具分享｜一键批量处理 Zeiss CZI 多通道图像：拆分、伪彩、Z 投影、合并与导出",
     "description": "Fiji 宏自动化处理蔡司 CZI 原始共聚焦文件，实现批量读取 CZI、通道拆分、Z‑stack 最大强度 MIP 投影、伪彩上色、通道合并、批量导出 TIF，标准化处理 LSM900 等产出的.czi 图像，减少手动重复操作，保证组间处理参数统一、结果可复现。",
@@ -2100,11 +2147,11 @@ export const categories = ["全部","科研绘图与分析","细胞生物学","�
 export const tags: TagSummary[] = [
   {
     "name": "科研绘图",
-    "count": 38
+    "count": 39
   },
   {
     "name": "数据分析",
-    "count": 34
+    "count": 35
   },
   {
     "name": "流式细胞术",
@@ -2112,7 +2159,7 @@ export const tags: TagSummary[] = [
   },
   {
     "name": "Fiji",
-    "count": 15
+    "count": 16
   },
   {
     "name": "FlowJo",
